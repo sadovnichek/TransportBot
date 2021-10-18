@@ -1,2 +1,8 @@
-# JavaBot
-afa
+# TransportBot Telegram
+
+Авторы:
+
+Капкаев Виктор
+
+Кобяков Данил
+
