@@ -5,9 +5,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class Main {
     public static void main(String[] argv) {
         ApiContextInitializer.init();
+        String token = System.getenv("BOT_TOKEN");
         TelegramBotsApi botsApi = new TelegramBotsApi();
         try {
-            botsApi.registerBot(new Bot("2006409243:AAHIVdBxD5t_s57nvC7tyCVPTMTjjXmNcJE"));
+            botsApi.registerBot(new Bot(token));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
