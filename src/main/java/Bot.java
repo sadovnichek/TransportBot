@@ -17,8 +17,10 @@ public class Bot extends TelegramLongPollingBot {
 
     public Bot(String token) {
         this.token = token;
-        List<Handler> handlers = new ArrayList<Handler>();
-        handlers.add(new StartHandler());
+        List<Handler> handlers = List.of(
+                new StartHandler()
+        );
+
         updateReceiver = new UpdateReceiver(handlers);
     }
 

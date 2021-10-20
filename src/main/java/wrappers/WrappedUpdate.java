@@ -6,16 +6,11 @@ public class WrappedUpdate {
     private long chatId;
     private String messageData;
     private String command;
-    private Integer messageId;
-    private boolean hasCallBackQuery;
+    private boolean hasCommand;
 
     //region Property
-    public boolean hasHasCallBackQuery() {
-        return hasCallBackQuery;
-    }
-
-    public Integer getMessageId() {
-        return messageId;
+    public boolean hasCommand() {
+        return hasCommand;
     }
 
     public String getMessageData() {
@@ -31,16 +26,14 @@ public class WrappedUpdate {
     //endregion
 
     public WrappedUpdate(Update update) {
-        if (update.hasCallbackQuery()) {
-            hasCallBackQuery = true;
-            chatId = update.getCallbackQuery().getFrom().getId();
-            command = update.getCallbackQuery().getMessage().getText();
-            messageData = update.getCallbackQuery().getData();
-            messageId = update.getCallbackQuery().getMessage().getMessageId();
-        }
-        else if (update.hasMessage() && update.getMessage().hasText()) {
+        if (update.hasMessage() && update.getMessage().hasText()) {
             messageData = update.getMessage().getText();
             chatId = update.getMessage().getChatId();
+
+            if(messageData.charAt(0) == '/') {
+                hasCommand = true;
+                command = messageData;
+            }
         }
     }
 }

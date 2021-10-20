@@ -1,5 +1,6 @@
 package models;
 
+import handlers.StartHandler;
 import wrappers.ResponseMessage;
 import wrappers.WrappedUpdate;
 
@@ -25,20 +26,20 @@ public class UpdateReceiver {
         User user = chatIdToUser.get(chatId);
 
         try {
-            if (wrappedUpdate.hasHasCallBackQuery())
-                return getHandlerByCallBackQuery(wrappedUpdate.getMessageData())
-                        .handleCallbackQuery(user, wrappedUpdate);
+            if (wrappedUpdate.hasCommand())
+                return getHandlerByQuery(wrappedUpdate.getCommand())
+                        .handleMessage(user, wrappedUpdate);
             return new ArrayList<>();
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();
         }
     }
 
-    private Handler getHandlerByCallBackQuery(String query) {
-        return handlers.stream()
-                .filter(h -> h.handledCallBackQuery().stream()
-                        .anyMatch(query::startsWith))
+    private Handler getHandlerByQuery(String query) {
+        var x = handlers.stream()
+                .filter(h -> h.getHandledCommand().startsWith(query))
                 .findAny()
                 .orElseThrow(UnsupportedOperationException::new);
+        return x;
     }
 }
