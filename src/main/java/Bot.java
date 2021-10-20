@@ -1,3 +1,5 @@
+import handlers.HelpHandler;
+import handlers.NextBusHandler;
 import handlers.StartHandler;
 import models.Handler;
 import models.UpdateReceiver;
@@ -17,9 +19,10 @@ public class Bot extends TelegramLongPollingBot {
     public Bot(String token) {
         this.token = token;
         List<Handler> handlers = List.of(
-                new StartHandler()
+                new StartHandler(),
+                new NextBusHandler(),
+                new HelpHandler()
         );
-
         updateReceiver = new UpdateReceiver(handlers);
     }
 

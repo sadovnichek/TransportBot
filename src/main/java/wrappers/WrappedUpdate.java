@@ -32,7 +32,7 @@ public class WrappedUpdate {
 
             if(messageData.charAt(0) == '/') {
                 hasCommand = true;
-                command = messageData;
+                command = messageData.split("[\\s]")[0];
             }
         }
     }

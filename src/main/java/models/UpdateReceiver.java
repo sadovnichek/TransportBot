@@ -28,7 +28,11 @@ public class UpdateReceiver {
             if (wrappedUpdate.hasCommand())
                 return getHandlerByCommand(wrappedUpdate.getCommand())
                         .handleMessage(user, wrappedUpdate);
-            return new ArrayList<>();
+            else
+            {
+                return getHandlerByCommand("/help")
+                        .handleMessage(user, wrappedUpdate);
+            }
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();
         }

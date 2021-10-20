@@ -9,13 +9,14 @@ import wrappers.WrappedUpdate;
 import java.util.List;
 
 public class StartHandler implements Handler {
-
     public String getHandledCommand(){
         return "/start";
     }
 
     public List<ResponseMessage> handleMessage(User user, WrappedUpdate message) {
-        String startText = "*Привет! Я - Transport Bot *";
+        String startText = "*Привет! Я - Transport Bot\n" +
+                "Я подскажу тебе через сколько минут приедет твой автобус\n" +
+                "Помощь тут - /help *";
         SimpleMessageResponse startMessage = new SimpleMessageResponse(user.getChatId(), startText);
         startMessage.enableMarkdown();
         user.setLastQueryTime();
