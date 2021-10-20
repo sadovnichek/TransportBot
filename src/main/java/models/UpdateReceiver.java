@@ -1,6 +1,5 @@
 package models;
 
-import handlers.StartHandler;
 import wrappers.ResponseMessage;
 import wrappers.WrappedUpdate;
 
@@ -27,7 +26,7 @@ public class UpdateReceiver {
 
         try {
             if (wrappedUpdate.hasCommand())
-                return getHandlerByQuery(wrappedUpdate.getCommand())
+                return getHandlerByCommand(wrappedUpdate.getCommand())
                         .handleMessage(user, wrappedUpdate);
             return new ArrayList<>();
         } catch (UnsupportedOperationException e) {
@@ -35,11 +34,10 @@ public class UpdateReceiver {
         }
     }
 
-    private Handler getHandlerByQuery(String query) {
-        var x = handlers.stream()
-                .filter(h -> h.getHandledCommand().startsWith(query))
+    private Handler getHandlerByCommand(String command) {
+        return handlers.stream()
+                .filter(h -> h.getHandledCommand().startsWith(command))
                 .findAny()
                 .orElseThrow(UnsupportedOperationException::new);
-        return x;
     }
 }

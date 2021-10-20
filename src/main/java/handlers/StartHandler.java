@@ -6,8 +6,6 @@ import wrappers.ResponseMessage;
 import wrappers.SimpleMessageResponse;
 import wrappers.WrappedUpdate;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class StartHandler implements Handler {
