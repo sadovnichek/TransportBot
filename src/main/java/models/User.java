@@ -2,6 +2,9 @@ package models;
 
 import java.util.Date;
 
+/**
+ * Класс пользователя
+ */
 public class User {
     private final long chatId;
     private long lastQueryTime;
