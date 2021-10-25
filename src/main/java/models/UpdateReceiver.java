@@ -1,14 +1,19 @@
 package models;
 
 import wrappers.ResponseMessage;
-import wrappers.WrappedUpdate;
+import wrappers.MessageData;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Принимает обновление от пользователя и обрабатывает его
+ */
 public class UpdateReceiver {
+    /**
+     * Список с обработчиками команд
+     */
     private final List<Handler> handlers;
     private final ConcurrentHashMap<Long, User> chatIdToUser;
 
@@ -17,27 +22,39 @@ public class UpdateReceiver {
         chatIdToUser = new ConcurrentHashMap<>();
     }
 
-    public List<ResponseMessage> handle(WrappedUpdate wrappedUpdate) {
-        long chatId = wrappedUpdate.getChatId();
+    /**
+     * Добавляет пользователя в словарь.
+     * Вызывает обработчик команды и обрабатывает её
+     * @param message
+     * @see MessageData
+     * @return список сообщений, сгенерированных ботом
+     * */
+    public List<ResponseMessage> handle(MessageData message) {
+        long chatId = message.getChatId();
 
         if (!chatIdToUser.containsKey(chatId))
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
 
         try {
-            if (wrappedUpdate.hasCommand())
-                return getHandlerByCommand(wrappedUpdate.getCommand())
-                        .handleMessage(user, wrappedUpdate);
+            if (message.hasCommand())
+                return getHandlerByCommand(message.getCommand())
+                        .handleMessage(user, message);
             else
             {
                 return getHandlerByCommand("/help")
-                        .handleMessage(user, wrappedUpdate);
+                        .handleMessage(user, message);
             }
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();
         }
     }
 
+    /**
+     * Выбирает обработчик для данной команды
+     * @param command - команда, поступившая от пользователя
+     * @return обработчик (handler)
+     */
     private Handler getHandlerByCommand(String command) {
         return handlers.stream()
                 .filter(h -> h.getHandledCommand().startsWith(command))
