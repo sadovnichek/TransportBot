@@ -33,4 +33,9 @@ public class SimpleMessageResponse implements ResponseMessage{
         sendMessage.enableMarkdown(enableMarkdown);
         return sendMessage;
     }
+
+    public String getMessage()
+    {
+        return this.message;
+    }
 }

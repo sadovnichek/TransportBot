@@ -28,7 +28,7 @@ public class StartHandler implements Handler {
     public List<ResponseMessage> handleMessage(User user, MessageData message) {
         String startText = "*Привет! Я - Transport Bot\n" +
                 "Я подскажу тебе через сколько минут приедет твой автобус\n" +
-                "Помощь тут - /help *";
+                "Помощь тут - /help*";
         SimpleMessageResponse startMessage = new SimpleMessageResponse(user.getChatId(), startText);
         startMessage.enableMarkdown();
         return List.of(startMessage);
