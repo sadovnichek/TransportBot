@@ -1,14 +1,9 @@
-package javatests;
-
-import handlers.HelpHandler;
 import handlers.NextBusHandler;
-import handlers.StartHandler;
 import models.BusStops;
 import models.User;
 import org.junit.Before;
 import org.junit.Test;
 import wrappers.MessageData;
-import wrappers.SimpleMessageResponse;
 
 import static junit.framework.Assert.*;
 import static org.mockito.Mockito.mock;

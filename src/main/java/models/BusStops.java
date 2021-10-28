@@ -55,7 +55,8 @@ public class BusStops {
             Document doc = Jsoup.connect(busStops.get(name)).get();
             Elements headLines = doc.getElementsByClass("ui header");
             for (Element headline : headLines) {
-                result.add(headline.text());
+                if(!headline.text().equals("конечная"))
+                    result.add(headline.text());
             }
             return result;
         } catch (IOException e) {
@@ -88,8 +89,10 @@ public class BusStops {
                         text = text.replace("ТВ", " Трамвай-");
                     else if(text.contains("Т"))
                         text = text.replace("Т", " Троллейбус-");
-                    TimeTable timeTable = new TimeTable(name, direction, makeTimeTableFromString(text));
-                    result.add(timeTable);
+                    if(!text.equals("")) {
+                        TimeTable timeTable = new TimeTable(name, direction, makeTimeTableFromString(text));
+                        result.add(timeTable);
+                    }
                 }
             }
             return result;
