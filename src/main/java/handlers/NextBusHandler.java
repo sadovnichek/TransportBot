@@ -73,6 +73,8 @@ public class NextBusHandler implements Handler {
             if(busStops.getReferenceByName(direction) == null)
                 return "*Такого направления нет. Проверьте правильность написания.*";
             var timetables = busStops.getTimeTable(name, direction);
+            if (timetables.size() == 0)
+                return "*Нет транспорта в ближайшее время.*";
             for(TimeTable timetable : timetables){
                 reply.append(timetable).append("\n");
             }

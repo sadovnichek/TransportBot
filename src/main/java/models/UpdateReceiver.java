@@ -2,9 +2,11 @@ package models;
 
 import wrappers.ResponseMessage;
 import wrappers.MessageData;
+import wrappers.SimpleMessageResponse;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,20 +33,19 @@ public class UpdateReceiver {
      * */
     public List<ResponseMessage> handle(MessageData message) {
         long chatId = message.getChatId();
-
         if (!chatIdToUser.containsKey(chatId))
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
-
         try {
-            if (message.hasCommand())
+            if (message.hasCommand()) {
+                if(Objects.equals(message.getCommand(), "/users"))
+                    return List.of(new SimpleMessageResponse(chatId, String.valueOf(chatIdToUser.size())));
                 return getHandlerByCommand(message.getCommand())
                         .handleMessage(user, message);
+            }
             else
-            {
                 return getHandlerByCommand("/help")
                         .handleMessage(user, message);
-            }
         } catch (UnsupportedOperationException e) {
             return Collections.emptyList();
         }
