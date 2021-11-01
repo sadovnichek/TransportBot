@@ -68,11 +68,12 @@ public class NextBusHandler implements Handler {
         if(busStops.getReferenceByName(name) == null)
             return "*Такой остановки нет. Проверьте правильность написания.*";
         if(length == 2) { // correct
-            String direction = words[1].trim();
+            boolean onlyTram = words[1].contains("(Трамвай)");
+            String direction = words[1].replace("(Трамвай)", "").trim();
             StringBuilder reply = new StringBuilder();
             if(busStops.getReferenceByName(direction) == null)
                 return "*Такого направления нет. Проверьте правильность написания.*";
-            var timetables = busStops.getTimeTable(name, direction);
+            var timetables = busStops.getTimeTable(name, direction, onlyTram);
             if (timetables.size() == 0)
                 return "*Нет транспорта в ближайшее время.*";
             for(TimeTable timetable : timetables){

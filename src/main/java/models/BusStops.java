@@ -7,6 +7,8 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Класс - обёртка над Map<String, String>
@@ -55,8 +57,15 @@ public class BusStops {
             Document doc = Jsoup.connect(busStops.get(name)).get();
             Elements headLines = doc.getElementsByClass("ui header");
             for (Element headline : headLines) {
-                if(!headline.text().equals("конечная"))
-                    result.add(headline.text());
+                String text = headline.text();
+                if(!text.equals("конечная")) {
+                    var timeTables = Stream.concat(getTimeTable(name, text, false).stream(),
+                                    getTimeTable(name, text, true).stream())
+                            .collect(Collectors.toList());
+                    for (TimeTable t : timeTables) {
+                        result.add(text + ((t.isTram()) ? " (Трамвай)" : "") );
+                    }
+                }
             }
             return result;
         } catch (IOException e) {
@@ -74,7 +83,7 @@ public class BusStops {
      * @return список расписаний.
      * @see TimeTable
      */
-    public List<TimeTable> getTimeTable(String name, String direction){
+    public List<TimeTable> getTimeTable(String name, String direction, boolean onlyTram){
         List<TimeTable> result = new ArrayList<>();
         try {
             Document doc = Jsoup.connect(busStops.get(name)).get();
@@ -91,7 +100,14 @@ public class BusStops {
                         text = text.replace("Т", " Троллейбус-");
                     if(!text.equals("")) {
                         TimeTable timeTable = new TimeTable(name, direction, makeTimeTableFromString(text));
-                        result.add(timeTable);
+                        if(onlyTram){
+                            if(timeTable.isTram())
+                                result.add(timeTable);
+                        }
+                        else {
+                            if(!timeTable.isTram())
+                                result.add(timeTable);
+                        }
                     }
                 }
             }

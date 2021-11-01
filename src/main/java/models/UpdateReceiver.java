@@ -5,6 +5,7 @@ import wrappers.MessageData;
 import wrappers.SimpleMessageResponse;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,10 +19,12 @@ public class UpdateReceiver {
      */
     private final List<Handler> handlers;
     private final ConcurrentHashMap<Long, User> chatIdToUser;
+    private final Date lastTimeUpdateOnServer;
 
     public UpdateReceiver(List<Handler> handlers) {
         this.handlers = handlers;
         chatIdToUser = new ConcurrentHashMap<>();
+        lastTimeUpdateOnServer = new Date();
     }
 
     /**
@@ -39,7 +42,8 @@ public class UpdateReceiver {
         try {
             if (message.hasCommand()) {
                 if(Objects.equals(message.getCommand(), "/users"))
-                    return List.of(new SimpleMessageResponse(chatId, String.valueOf(chatIdToUser.size())));
+                    return List.of(new SimpleMessageResponse(chatId, String.valueOf(chatIdToUser.size())),
+                    new SimpleMessageResponse(chatId, "Last start: " + lastTimeUpdateOnServer));
                 return getHandlerByCommand(message.getCommand())
                         .handleMessage(user, message);
             }
