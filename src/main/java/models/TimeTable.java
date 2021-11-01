@@ -13,11 +13,23 @@ public class TimeTable {
     private final Map<String, List<String>> timeTable;
     private final String busStopName;
     private final String direction;
+    private final boolean isTram;
 
     public TimeTable(String name, String direction, Map<String, List<String>> timeTable) {
         this.busStopName = name;
         this.timeTable = timeTable;
         this.direction = direction;
+        isTram = timeTable.get(timeTable.keySet().toArray()[0]).get(0).startsWith("Трамвай");
+    }
+
+    public boolean isTram()
+    {
+        return isTram;
+    }
+
+    public String getName()
+    {
+        return busStopName;
     }
 
     /**
@@ -28,7 +40,7 @@ public class TimeTable {
         if(timeTable.size() == 0)
             return "\n";
         String headline = "*" + busStopName + "-->" + direction;
-        if(timeTable.get(timeTable.keySet().toArray()[0]).get(0).startsWith("Трамвай"))
+        if(isTram)
             headline += " (Трамвай)*\n";
         else
             headline += "*\n";
