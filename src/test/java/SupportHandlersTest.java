@@ -8,7 +8,7 @@ import wrappers.MessageData;
 import static junit.framework.Assert.*;
 import static org.mockito.Mockito.mock;
 
-public class SupportHandlersTests {
+public class SupportHandlersTest {
     private User user;
     private StartHandler startHandler;
     private HelpHandler helpHandler;
