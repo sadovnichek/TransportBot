@@ -1,5 +1,7 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,11 +17,11 @@ public class TimeTable {
     private final String direction;
     private final boolean isTram;
 
-    public TimeTable(String name, String direction, Map<String, List<String>> timeTable) {
+    public TimeTable(String name, String direction, String timetable) {
         this.busStopName = name;
-        this.timeTable = timeTable;
+        this.timeTable = makeTimeTableFromString(timetable);
         this.direction = direction;
-        isTram = timeTable.get(timeTable.keySet().toArray()[0]).get(0).startsWith("Трамвай");
+        isTram = this.timeTable.get(this.timeTable.keySet().toArray()[0]).get(0).startsWith("Трамвай");
     }
 
     public boolean isTram()
@@ -27,9 +29,27 @@ public class TimeTable {
         return isTram;
     }
 
-    public String getName()
-    {
-        return busStopName;
+    /**
+     * Переводит строку со значениями в словарь (время): (номер маршрута)
+     * @param source - строка, найденную в getTimeTable.
+     * @return словарь
+     */
+    private Map<String, List<String>> makeTimeTableFromString(String source) {
+        Map<String, List<String>> timeTable = new LinkedHashMap<>();
+        List<String> routes = new ArrayList<>();
+        var tokens = source.split("\\s+");
+        String currentTime = "";
+        for (var token : tokens) {
+            if(token.contains(":")) {
+                timeTable.put(token, routes);
+                currentTime = token;
+                routes = new ArrayList<>();
+            }
+            else {
+                timeTable.get(currentTime).add(token);
+            }
+        }
+        return timeTable;
     }
 
     /**
@@ -37,20 +57,15 @@ public class TimeTable {
      */
     @Override
     public String toString() {
-        if(timeTable.size() == 0)
-            return "\n";
         String headline = "*" + busStopName + "-->" + direction;
-        if(isTram)
-            headline += " (Трамвай)*\n";
-        else
-            headline += "*\n";
+        headline += (isTram) ? " (Трамвай)*\n" : "*\n";
         var result = new StringBuilder(headline);
         for (var time : timeTable.keySet()) {
             result.append(time).append("\t");
             int size = timeTable.get(time).size();
             for(int i = 0; i < size; i++) {
                 String route = timeTable.get(time).get(i);
-                String space = (i != size - 1) ? ", " : "";
+                String space = (i != size - 1) ? ", " : ""; // space by comma or not, if last
                 result.append(route).append(space);
             }
             result.append('\n');

@@ -4,10 +4,13 @@ import models.BusStops;
 import models.Handler;
 import models.TimeTable;
 import models.User;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import wrappers.ResponseMessage;
 import wrappers.SimpleMessageResponse;
 import wrappers.MessageData;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +55,7 @@ public class NextBusHandler implements Handler {
     }
 
     /**
-     * Обрабатывает данные, полуенные от пользователя
+     * Обрабатывает данные, полученные от пользователя
      * @param data - сообщение от пользователя без команды /nextbus
      * @return генерирует ответ - строку
      */
@@ -70,25 +73,39 @@ public class NextBusHandler implements Handler {
         if(length == 2) { // correct
             boolean onlyTram = words[1].contains("(Трамвай)");
             String direction = words[1].replace("(Трамвай)", "").trim();
-            StringBuilder reply = new StringBuilder();
-            if(busStops.getReferenceByName(direction) == null)
-                return "*Такого направления нет. Проверьте правильность написания.*";
-            var timetables = busStops.getTimeTable(name, direction, onlyTram);
+            return ProcessDefinedDirection(name, direction, onlyTram);
+        }
+        else if (length == 1) { // if not defined direction
+            return ProcessNonDefinedDirection(name);
+        }
+        return "*Произошла неизвестная ошибка.*";
+    }
+
+    private String ProcessDefinedDirection(String name, String direction, boolean onlyTram) {
+        if(busStops.getReferenceByName(direction) == null)
+            return "*Такого направления нет. Проверьте правильность написания.*";
+        StringBuilder reply = new StringBuilder();
+        try {
+            Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
+            var timetables = busStops.getTimeTable(name, direction, onlyTram, doc);
             if (timetables.size() == 0)
                 return "*Нет транспорта в ближайшее время.*";
             for(TimeTable timetable : timetables){
                 reply.append(timetable).append("\n");
             }
             return reply.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        else if (length == 1) { // if not defined direction
-            StringBuilder reply = new StringBuilder("*Укажите направление из возможных:*\n\n");
-            Set<String> directions = busStops.getDirections(name);
-            for(String route : directions){
-                reply.append(route).append("\n");
-            }
-            return reply.toString();
+        return null;
+    }
+
+    private String ProcessNonDefinedDirection(String name) {
+        StringBuilder reply = new StringBuilder("*Укажите направление из возможных:*\n\n");
+        Set<String> directions = busStops.getDirections(name);
+        for(String route : directions){
+            reply.append(route).append("\n");
         }
-        return "*Произошла неизвестная ошибка.*";
+        return reply.toString();
     }
 }

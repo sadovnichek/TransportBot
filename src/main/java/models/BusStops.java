@@ -59,15 +59,14 @@ public class BusStops {
             for (Element headline : headLines) {
                 String text = headline.text();
                 if(!text.equals("конечная")) {
-                    var timeTables = Stream.concat(getTimeTable(name, text, false).stream(),
-                                    getTimeTable(name, text, true).stream())
+                    var timeTables = Stream.concat(getTimeTable(name, text, false, doc).stream(),
+                                    getTimeTable(name, text, true, doc).stream())
                             .collect(Collectors.toList());
                     for (TimeTable t : timeTables) {
                         result.add(text + ((t.isTram()) ? " (Трамвай)" : "") );
                     }
                 }
-            }
-            return result;
+            } return result;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,61 +82,30 @@ public class BusStops {
      * @return список расписаний.
      * @see TimeTable
      */
-    public List<TimeTable> getTimeTable(String name, String direction, boolean onlyTram){
+    public List<TimeTable> getTimeTable(String name, String direction, boolean onlyTram, Document doc){
         List<TimeTable> result = new ArrayList<>();
-        try {
-            Document doc = Jsoup.connect(busStops.get(name)).get();
-            Elements headLines = doc.getElementsByClass("eight wide column").select("div");
-            for (Element headline : headLines) {
-                String text = headline.text();
-                if(text.startsWith("табло " + direction) && text.contains("время")) {
-                    text = text.replace("табло", "").replace("время", "")
-                            .replace("+", "").replace("маршруты", "")
-                            .replace(direction, "").trim();
-                    if(text.contains("ТВ"))
-                        text = text.replace("ТВ", " Трамвай-");
-                    else if(text.contains("Т"))
-                        text = text.replace("Т", " Троллейбус-");
-                    if(!text.equals("")) {
-                        TimeTable timeTable = new TimeTable(name, direction, makeTimeTableFromString(text));
-                        if(onlyTram){
-                            if(timeTable.isTram())
-                                result.add(timeTable);
-                        }
-                        else {
-                            if(!timeTable.isTram())
-                                result.add(timeTable);
-                        }
-                    }
-                }
+        Elements headLines = doc.getElementsByClass("eight wide column").select("div");
+        for (Element headline : headLines) {
+            String timetableText = headline.text();
+            if(timetableText.startsWith("табло " + direction) && timetableText.contains("время")) {
+                timetableText = transformData(timetableText, direction);
+                TimeTable timeTable = new TimeTable(name, direction, timetableText);
+                if(onlyTram && timeTable.isTram())
+                    result.add(timeTable);
+                else if (!onlyTram && !timeTable.isTram())
+                    result.add(timeTable);
             }
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
+        } return result;
     }
 
-    /**
-     * Переводит строку со значениями в словарь (время): (номер маршрута)
-     * @param source - строка, найденную в getTimeTable.
-     * @return словарь
-     */
-    private Map<String, List<String>> makeTimeTableFromString(String source) {
-        Map<String, List<String>> timeTable = new LinkedHashMap<>();
-        List<String> routes = new ArrayList<>();
-        var tokens = source.split("\\s+");
-        String currentTime = "";
-        for (var token : tokens) {
-            if(token.contains(":")) {
-                timeTable.put(token, routes);
-                currentTime = token;
-                routes = new ArrayList<>();
-            }
-            else {
-                timeTable.get(currentTime).add(token);
-            }
-        }
-        return timeTable;
+    private String transformData(String source, String direction) {
+        source = source.replace("табло", "").replace("время", "")
+                .replace("+", "").replace("маршруты", "")
+                .replace(direction, "").trim();
+        if (source.contains("ТВ"))
+            source = source.replace("ТВ", " Трамвай-");
+        else if (source.contains("Т"))
+            source = source.replace("Т", " Троллейбус-");
+        return source;
     }
 }
