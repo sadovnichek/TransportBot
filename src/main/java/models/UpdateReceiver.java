@@ -40,7 +40,7 @@ public class UpdateReceiver {
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
         try {
-            if (message.hasCommand()) {
+            if (message.hasCommand() && !message.getMessageData().trim().equals("")) {
                 if(Objects.equals(message.getCommand(), "/users"))
                     return List.of(new SimpleMessageResponse(chatId, String.valueOf(chatIdToUser.size())),
                     new SimpleMessageResponse(chatId, "Last start: " + lastTimeUpdateOnServer));
