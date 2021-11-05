@@ -40,10 +40,13 @@ public class UpdateReceiver {
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
         try {
-            if (message.hasCommand() && !message.getMessageData().trim().equals("")) {
+            if (message.hasCommand()) {
                 if(Objects.equals(message.getCommand(), "/users"))
                     return List.of(new SimpleMessageResponse(chatId, String.valueOf(chatIdToUser.size())),
                     new SimpleMessageResponse(chatId, "Last start: " + lastTimeUpdateOnServer));
+                if(Objects.equals(message.getCommand(), "/nextbus") && message.getMessageData().trim().equals(""))
+                    return getHandlerByCommand("/help")
+                            .handleMessage(user, message);
                 return getHandlerByCommand(message.getCommand())
                         .handleMessage(user, message);
             }
