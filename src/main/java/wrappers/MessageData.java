@@ -16,6 +16,7 @@ public class MessageData {
     }
 
     public String getMessageData() {
+        if (hasCommand) return messageData.replace(command, "");
         return messageData;
     }
 

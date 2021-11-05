@@ -36,6 +36,10 @@ public class BusStops {
         }
     }
 
+    public Set<String> getAllNames() {
+        return busStops.keySet();
+    }
+
     /**
      * @param name - название остановки
      * @return ссылку на остановку на сайте bustime.ru
@@ -89,6 +93,7 @@ public class BusStops {
             String timetableText = headline.text();
             if(timetableText.startsWith("табло " + direction) && timetableText.contains("время")) {
                 timetableText = transformData(timetableText, direction);
+                if (timetableText == "") continue;
                 TimeTable timeTable = new TimeTable(name, direction, timetableText);
                 if(onlyTram && timeTable.isTram())
                     result.add(timeTable);
