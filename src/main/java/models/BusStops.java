@@ -93,7 +93,7 @@ public class BusStops {
             String timetableText = headline.text();
             if(timetableText.startsWith("табло " + direction) && timetableText.contains("время")) {
                 timetableText = transformData(timetableText, direction);
-                if (timetableText == "") continue;
+                if (timetableText.equals("")) continue;
                 TimeTable timeTable = new TimeTable(name, direction, timetableText);
                 if(onlyTram && timeTable.isTram())
                     result.add(timeTable);
