@@ -62,19 +62,29 @@ public class NextBusHandler implements Handler {
         String[] words = data.trim().split("[:]+");
         int length = words.length;
         String name = spellchecker.editWord(words[0]);
-        if (Character.isLetter(name.charAt(0)) && Character.isLowerCase(name.charAt(0))
-        && busStops.getReferenceByName(name) == null && processIncorrectWord(name) == "") {
-            var charToChange = Character.toUpperCase(name.charAt(0));
-            name = charToChange + name.substring(1);
-        }
-        if(busStops.getReferenceByName(name) == null)
-            return "*Такой остановки нет. Возможно, вы имели в виду:*\n" + processIncorrectWord(name);
-        if(length == 2) { // correct
+        if(busStops.getReferenceByName(name) == null) {
+            System.out.println(name);
+            var suggestedWords = spellchecker.tryGetCorrectName(name);
+            if(suggestedWords.size() == 1)
+                name = suggestedWords.iterator().next();
+            else {
+                suggestedWords.addAll(spellchecker.sortByEditorDistance(name));
+                return "*Такой остановки нет. Возможно, вы имели в виду:*\n"
+                        + printSuggestions(suggestedWords);
+            }
+        } if(length == 2) { // correct
             boolean onlyTram = words[1].contains("(Трамвай)");
             var direction = spellchecker.editWord(words[1]);
-            if(busStops.getReferenceByName(direction) == null)
-                return "*Такого направления нет. Возможно, вы имели в виду:*\n" + processIncorrectWord(direction);
-            return processDefinedDirection(name, direction, onlyTram);
+            if(busStops.getReferenceByName(direction) == null) {
+                System.out.println(direction);
+                var suggestedWords = spellchecker.tryGetCorrectName(direction);
+                if(suggestedWords.size() == 1)
+                    name = suggestedWords.iterator().next();
+                else {
+                    suggestedWords.addAll(spellchecker.sortByEditorDistance(direction));
+                    return "*Такого направления нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
+                }
+            } return processDefinedDirection(name, direction, onlyTram);
         }
         else if (length == 1) // if not defined direction
             return processNonDefinedDirection(name);
@@ -109,11 +119,10 @@ public class NextBusHandler implements Handler {
         return reply.toString();
     }
 
-    private String processIncorrectWord(String word) {
+    private String printSuggestions(List<String> words) {
         StringBuilder reply = new StringBuilder();
-        var help = spellchecker.tryHelpName(word);
-        for (var tip : help)
-            reply.append(tip).append("\n");
+        for (var hint : words)
+            reply.append(hint).append("\n");
         return reply.toString();
     }
 }
