@@ -15,6 +15,9 @@ public class MessageData {
         return hasCommand;
     }
 
+    /**
+     * Сохраняет сообщение без команды
+     */
     public String getMessageData() {
         if (hasCommand) return messageData.replace(command, "");
         return messageData;

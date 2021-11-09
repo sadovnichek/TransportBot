@@ -22,12 +22,9 @@ public class NextBusHandler implements Handler {
     private final BusStops busStops;
     private final Spellchecker spellchecker;
 
-    /**
-     * Конструктор - создание нового объекта и инициализация busStops
-     */
     public NextBusHandler() {
         busStops = new BusStops();
-        spellchecker = new Spellchecker(busStops);
+        spellchecker = new Spellchecker(busStops.getAllNames());
     }
 
     /**
@@ -39,7 +36,7 @@ public class NextBusHandler implements Handler {
     }
 
     /**
-     * Принимает сообщение от пользователя
+     * Принимает сообщение от пользователя, возвращает ответ
      * @param user - сам пользователь
      * @param message - сообщение от пользователя
      * @return сообщения, сгенерированные ботом
@@ -91,6 +88,13 @@ public class NextBusHandler implements Handler {
         return "*Произошла неизвестная ошибка.*";
     }
 
+    /**
+     * Обрабатывает входные данные, если указаны название и направление.
+     * @param name имя остановки
+     * @param direction направление - следующая остановка по пути маршрута
+     * @param onlyTram - является ли остановка трамвайной
+     * @return расписание в виде строки
+     */
     private String processDefinedDirection(String name, String direction, boolean onlyTram) {
         StringBuilder reply = new StringBuilder();
         try {
@@ -108,6 +112,11 @@ public class NextBusHandler implements Handler {
         return null;
     }
 
+    /**
+     * Обрабатывает входные данные, если указано только название
+     * @param name имя остановки
+     * @return строка с названиями направлений
+     */
     private String processNonDefinedDirection(String name) {
         StringBuilder reply = new StringBuilder("*Укажите направление из возможных:*\n\n");
         Set<String> directions = busStops.getDirections(name);
@@ -119,6 +128,10 @@ public class NextBusHandler implements Handler {
         return reply.toString();
     }
 
+    /**
+     * Переводит список строк - подсказок в единую строку
+     * @param words список подсказок для пользователя, если он ошибся
+     */
     private String printSuggestions(List<String> words) {
         StringBuilder reply = new StringBuilder();
         for (var hint : words)

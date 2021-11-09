@@ -22,6 +22,11 @@ public class SupportHandlersTest {
         update = mock(MessageData.class);
     }
 
+    /**
+     * Проверяет, что принятое сообщение меняет время последнего запроса
+     * Это нужно для контроля активности - нельзя отправлять боту сообщение
+     * чаще, чем 1 раз в 10 с.
+     */
     @Test
     public void startHandler_ShouldChangeUserLastQueryTime() {
         long preQueryTime = user.getLastQueryTime();
@@ -29,12 +34,18 @@ public class SupportHandlersTest {
         assertNotSame(preQueryTime, user.getLastQueryTime());
     }
 
+    /**
+     * Проверяет, что ответ существует, и кол-во сообщений от бота равно 1
+     */
     @Test
     public void startHandler_ShouldResponse() {
         var responses = startHandler.handleMessage(user, update);
         assertSame(1, responses.size());
     }
 
+    /**
+     * Проверка содержимого сообщения
+     */
     @Test
     public void startHandler_CheckMessage() {
         var responses = startHandler.handleMessage(user, update);
@@ -45,6 +56,11 @@ public class SupportHandlersTest {
         assertSame(expected, actual);
     }
 
+    /**
+     * Проверяет, что принятое сообщение меняет время последнего запроса
+     * Это нужно для контроля активности - нельзя отправлять боту сообщение
+     * чаще, чем 1 раз в 10 с.
+     */
     @Test
     public void helpHandler_ShouldChangeUserLastQueryTime() {
         long preQueryTime = user.getLastQueryTime();
@@ -52,12 +68,18 @@ public class SupportHandlersTest {
         assertNotSame(preQueryTime, user.getLastQueryTime());
     }
 
+    /**
+     * Проверяет, что ответ существует, и кол-во сообщений от бота равно 1
+     */
     @Test
     public void helpHandler_ShouldResponse() {
         var responses = helpHandler.handleMessage(user, update);
         assertSame(1, responses.size());
     }
 
+    /**
+     * Проверка содержимого сообщения
+     */
     @Test
     public void helpHandler_CheckMessage() {
         var responses = helpHandler.handleMessage(user, update);
