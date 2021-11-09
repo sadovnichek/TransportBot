@@ -4,13 +4,26 @@ import java.util.*;
 
 import static java.lang.Math.min;
 
+/**
+ * Класс проверки правописания
+ */
 public class Spellchecker {
+    /**
+     * Множество названий всех остановок
+     */
     private final Set<String> names;
 
-    public Spellchecker(BusStops busStops) {
-        this.names = busStops.getAllNames();
+    public Spellchecker(Set<String> words) {
+        this.names = words;
     }
 
+    /**
+     * Если пользователь ввёл только часть названия остановки, или ввёл с
+     * неправильным регистром первой буквы - этот метод предложит варианты
+     * исправления
+     * @param word - название остановки/направления
+     * @return список с возможными исправлениями
+     */
     public List<String> tryGetCorrectName(String word) {
         List<String> result = new ArrayList<>();
         for(String name : names) {
@@ -25,6 +38,12 @@ public class Spellchecker {
         return result;
     }
 
+    /**
+     * Вычисление расстояния Левенштейна (редакторской правки)
+     * @param first - исходное слово
+     * @param second - слово, которое мы хотим получить
+     * @return - число - искомая метрика
+     */
     private int LevenshteinDistance(String first, String second)
     {
         var opt = new int[first.length() + 1][second.length() + 1];
@@ -42,6 +61,10 @@ public class Spellchecker {
         return opt[first.length()][second.length()];
     }
 
+    /**
+     * Выводит слова в порядке возрастания метрики Левенштейна, максимум - 5 слов
+     * @param word - название остановки/направление движения
+     */
     public List<String> sortByEditorDistance(String word)
     {
         Map<Integer, String> distances = new TreeMap<>();
@@ -61,6 +84,9 @@ public class Spellchecker {
         return result;
     }
 
+    /**
+     * Меняет регистр первой буквы слова word на противоположный
+     */
     private String replaceFirstLetter(String word) {
         if(Character.isLetter(word.charAt(0))) {
             if(Character.isLowerCase(word.charAt(0))) {
@@ -77,6 +103,9 @@ public class Spellchecker {
         return word;
     }
 
+    /**
+     * Заменяет наиболее часто встречающиеся сокращения на правильные
+     */
     public String editWord(String word){
         if (word.contains("площадь"))
             word = word.replace("площадь", "пл.");

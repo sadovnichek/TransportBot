@@ -18,7 +18,13 @@ public class UpdateReceiver {
      * Список с обработчиками команд
      */
     private final List<Handler> handlers;
+    /**
+     * отображение: id чата -> пользователь
+     */
     private final ConcurrentHashMap<Long, User> chatIdToUser;
+    /**
+     * Время последнего запуска на сервере
+     */
     private final Date lastTimeUpdateOnServer;
 
     public UpdateReceiver(List<Handler> handlers) {

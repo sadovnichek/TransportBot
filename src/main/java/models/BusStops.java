@@ -18,7 +18,7 @@ public class BusStops {
      * Здесь хранятся названия остановок в виде ключей
      * и ссылки на них же на сайте bustime.ru в виде значений
      */
-    private final Map<String, String> busStops = new HashMap<>();
+    private Map<String, String> busStops = new HashMap<>();
 
     /**
      * Конструктор класса. Инициализирует значение поля busStops
@@ -36,6 +36,9 @@ public class BusStops {
         }
     }
 
+    /**
+     * @return множество названий всех остановок
+     */
     public Set<String> getAllNames() {
         return busStops.keySet();
     }
@@ -103,6 +106,11 @@ public class BusStops {
         } return result;
     }
 
+    /**
+     * форматирует полученную строку: убирает лишние данные, заменяет сокращения
+     * @param source - полученная строка
+     * @param direction направление движения (следующая остановка)
+     */
     private String transformData(String source, String direction) {
         source = source.replace("табло", "").replace("время", "")
                 .replace("+", "").replace("маршруты", "")
