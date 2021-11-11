@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import wrappers.MessageData;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,7 +23,7 @@ public class NextBusHandlerTests {
     }
 
     /**
-     * Проверяет, что бот умеет предлагать направление на на выбор, если
+     * Проверяет, что бот умеет предлагать направление на выбор, если
      * оно не указано
      */
     @Test
@@ -70,5 +71,17 @@ public class NextBusHandlerTests {
         when(update.getMessageData()).thenReturn("/nextbus");
         handler.handleMessage(user, update);
         assertNotSame(preQueryTime, user.getLastQueryTime());
+    }
+
+    /**
+     * Проверяет, что /nextbus не обрабатывает запросы, содержащие некорректные
+     * символы, а выдает сообщение об ошибке
+     */
+    @Test
+    public void nextBusHandler_ShouldIgnoreInvalidSymbols() {
+        when(update.getMessageData()).thenReturn("/nextbus @#$%^&");
+        var simpleMessageResponse = handler.handleMessage(user, update).get(0);
+        var reply = simpleMessageResponse.getMessage();
+        assertEquals("*Такой остановки нет.*", reply);
     }
 }

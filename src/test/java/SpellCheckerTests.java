@@ -15,18 +15,6 @@ public class SpellCheckerTests {
     }
 
     /**
-     * Умеет заменять первую букву на заглавную
-     */
-    @Test
-    public void spellchecker_ShouldEditFirstLetter() {
-        var word = "профессорская";
-        var suggestions = spellchecker.tryGetCorrectName(word);
-        Assert.assertEquals(1, suggestions.size());
-        String correct_word = suggestions.get(0);
-        Assert.assertEquals("Профессорская", correct_word);
-    }
-
-    /**
      * Если пользователь ввёл часть слова, предложить дополнение до полного
      */
     @Test
@@ -47,5 +35,16 @@ public class SpellCheckerTests {
         var word = "Транзагенство";
         var suggestions = spellchecker.sortByEditorDistance(word);
         Assert.assertTrue(suggestions.contains("Трансагентство"));
+    }
+
+    /**
+     * Умеет находить нужную остановку, если все первые буква
+     * каждого слова в запросе неправильного регистра
+     */
+    @Test
+    public void spellchecker_ShouldEditFirstLetters() {
+        var word = "оперный Театр";
+        var suggestions = spellchecker.tryGetCorrectName(word);
+        Assert.assertTrue(suggestions.contains("Оперный театр"));
     }
 }
