@@ -55,15 +55,17 @@ public class NextBusHandler implements Handler {
      * @param data - сообщение от пользователя без команды /nextbus
      * @return генерирует ответ - строку
      */
-    private String parseData(String data){
+    private String parseData(String data) {
         String[] words = data.trim().split("[:]+");
         int length = words.length;
         String name = spellchecker.editWord(words[0]);
+        if(spellchecker.isWordContainsIncorrectSymbols(name))
+            return "*Такой остановки нет.*";
         if(busStops.getReferenceByName(name) == null) {
             System.out.println(name);
             var suggestedWords = spellchecker.tryGetCorrectName(name);
             if(suggestedWords.size() == 1)
-                name = suggestedWords.iterator().next();
+                name = suggestedWords.get(0);
             else {
                 suggestedWords.addAll(spellchecker.sortByEditorDistance(name));
                 return "*Такой остановки нет. Возможно, вы имели в виду:*\n"
@@ -72,11 +74,13 @@ public class NextBusHandler implements Handler {
         } if(length == 2) { // correct
             boolean onlyTram = words[1].contains("(Трамвай)");
             var direction = spellchecker.editWord(words[1]);
+            if(spellchecker.isWordContainsIncorrectSymbols(direction))
+                return "*Такого направления нет.*";
             if(busStops.getReferenceByName(direction) == null) {
                 System.out.println(direction);
                 var suggestedWords = spellchecker.tryGetCorrectName(direction);
                 if(suggestedWords.size() == 1)
-                    name = suggestedWords.iterator().next();
+                    direction = suggestedWords.get(0);
                 else {
                     suggestedWords.addAll(spellchecker.sortByEditorDistance(direction));
                     return "*Такого направления нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
