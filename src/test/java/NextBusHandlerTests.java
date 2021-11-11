@@ -68,7 +68,7 @@ public class NextBusHandlerTests {
     @Test
     public void nextBusHandler_ShouldChangeUserLastQueryTime() {
         long preQueryTime = user.getLastQueryTime();
-        when(update.getMessageData()).thenReturn("/nextbus");
+        when(update.getMessageData()).thenReturn("/nextbus a");
         handler.handleMessage(user, update);
         assertNotSame(preQueryTime, user.getLastQueryTime());
     }

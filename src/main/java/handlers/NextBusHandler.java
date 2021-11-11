@@ -62,7 +62,6 @@ public class NextBusHandler implements Handler {
         if(spellchecker.isWordContainsIncorrectSymbols(name))
             return "*Такой остановки нет.*";
         if(busStops.getReferenceByName(name) == null) {
-            System.out.println(name);
             var suggestedWords = spellchecker.tryGetCorrectName(name);
             if(suggestedWords.size() == 1)
                 name = suggestedWords.get(0);

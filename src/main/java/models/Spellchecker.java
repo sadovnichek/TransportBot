@@ -146,10 +146,4 @@ public class Spellchecker {
             word = word.replace("России", "РФ");
         return word.trim();
     }
-
-    private boolean CharComparator(char a, char b){
-        a = Character.toUpperCase(a);
-        b = Character.toUpperCase(b);
-        return a == b;
-    }
 }
