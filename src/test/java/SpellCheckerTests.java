@@ -15,7 +15,7 @@ public class SpellCheckerTests {
 
     @Before
     public void setUp() throws IOException {
-        File input = new File("src\\test\\resources\\bus_stops.html");
+        File input = new File("src/test/resources/bus_stops.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
         busStops = new BusStops(doc);
         spellchecker = new Spellchecker(busStops.getAllNames());

@@ -24,7 +24,7 @@ public class NextBusHandlerTests {
 
     @Before
     public void setUp() throws IOException {
-        File input = new File("src\\test\\resources\\bus_stops.html");
+        File input = new File("src/test/resources/bus_stops.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
         user = new User(123);
         handler = new NextBusHandler(doc);
@@ -38,7 +38,7 @@ public class NextBusHandlerTests {
      */
     @Test
     public void nextBusHandler_ShouldSuggestDirections() throws IOException {
-        File input = new File("src\\test\\resources\\bazhova.html");
+        File input = new File("src/test/resources/bazhova.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/bazhova/");
         var suggestions = busStops.getDirections("Музей Бажова", doc);
         assertEquals(3, suggestions.size());
@@ -52,7 +52,7 @@ public class NextBusHandlerTests {
      */
     @Test
     public void nextBusHandler_ShouldGetTimetable() throws IOException {
-        File input = new File("src\\test\\resources\\bazhova.html");
+        File input = new File("src/test/resources/bazhova.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/bazhova/");
         var suggestions = busStops.getTimeTable("Музей Бажова", "Трамвайный парк (Чапаева)",
                 false, doc);
