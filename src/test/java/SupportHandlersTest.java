@@ -51,7 +51,6 @@ public class SupportHandlersTest {
         var responses = startHandler.handleMessage(user, update);
         var actual = responses.get(0).getMessage();
         var expected = "*Привет! Я - Transport Bot\n" +
-                "Я подскажу тебе через сколько минут приедет твой автобус\n" +
                 "Помощь тут - /help*";
         assertSame(expected, actual);
     }

@@ -61,7 +61,7 @@ public class TimeTable {
         headline += (isTram) ? " (Трамвай)*\n" : "*\n";
         var result = new StringBuilder(headline);
         for (var time : timeTable.keySet()) {
-            result.append(time).append("\t");
+            result.append(time).append("    ");
             int size = timeTable.get(time).size();
             for(int i = 0; i < size; i++) {
                 String route = timeTable.get(time).get(i);

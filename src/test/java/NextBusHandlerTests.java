@@ -1,9 +1,15 @@
 import handlers.NextBusHandler;
 import junit.framework.Assert;
+import models.BusStops;
 import models.User;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.Before;
 import org.junit.Test;
 import wrappers.MessageData;
+
+import java.io.File;
+import java.io.IOException;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
@@ -13,13 +19,17 @@ import static org.mockito.Mockito.when;
 public class NextBusHandlerTests {
     private User user;
     private NextBusHandler handler;
-    private MessageData update;
+    private MessageData message;
+    private BusStops busStops;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+        File input = new File("src\\test\\resources\\bus_stops.html");
+        Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
         user = new User(123);
-        handler = new NextBusHandler();
-        update = mock(MessageData.class);
+        handler = new NextBusHandler(doc);
+        message = mock(MessageData.class);
+        busStops = new BusStops(doc);
     }
 
     /**
@@ -27,26 +37,28 @@ public class NextBusHandlerTests {
      * оно не указано
      */
     @Test
-    public void nextBusHandler_ShouldSuggestDirections() {
-        when(update.getMessageData()).thenReturn("Музей Бажова");
-        var simpleMessageResponse = handler.handleMessage(user, update).get(0);
-        var reply = simpleMessageResponse.getMessage();
-        Assert.assertTrue(reply.contains("Укажите направление из возможных:"));
-        var lines = reply.split("[\n]+");
-        Assert.assertTrue(lines.length > 1);
+    public void nextBusHandler_ShouldSuggestDirections() throws IOException {
+        File input = new File("src\\test\\resources\\bazhova.html");
+        Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/bazhova/");
+        var suggestions = busStops.getDirections("Музей Бажова", doc);
+        assertEquals(3, suggestions.size());
+        Assert.assertTrue(suggestions.contains("Трамвайный парк (Чапаева)"));
+        Assert.assertTrue(suggestions.contains("Аэроагентство"));
+        Assert.assertTrue(suggestions.contains("Белинского (Декабристов)"));
     }
 
     /**
      * Проверяет, что бот вернёт расписание, если всё правильно
      */
     @Test
-    public void nextBusHandler_ShouldGetTimetable() {
-        when(update.getMessageData()).thenReturn("Большакова (Белинского): Декабристов (Белинского)");
-        var simpleMessageResponse = handler.handleMessage(user, update).get(0);
-        var reply = simpleMessageResponse.getMessage();
-        Assert.assertTrue(reply.contains("Большакова (Белинского)-->Декабристов (Белинского)"));
-        var lines = reply.split("[\n]+");
-        Assert.assertTrue(lines.length > 1);
+    public void nextBusHandler_ShouldGetTimetable() throws IOException {
+        File input = new File("src\\test\\resources\\bazhova.html");
+        Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/bazhova/");
+        var suggestions = busStops.getTimeTable("Музей Бажова", "Трамвайный парк (Чапаева)",
+                false, doc);
+        assertEquals(1, suggestions.size());
+        var timetable = suggestions.get(0).toString();
+        Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n16:13    Троллейбус-11\n"));
     }
 
     /**
@@ -54,8 +66,8 @@ public class NextBusHandlerTests {
      */
     @Test
     public void nextBusHandler_ShouldReplyIfBusStop_NotExist() {
-        when(update.getMessageData()).thenReturn("Морской путь");
-        var simpleMessageResponse = handler.handleMessage(user, update).get(0);
+        when(message.getMessageData()).thenReturn("Морской путь");
+        var simpleMessageResponse = handler.handleMessage(user, message).get(0);
         var reply = simpleMessageResponse.getMessage();
         Assert.assertTrue(reply.contains("Такой остановки нет. Возможно, вы имели в виду:"));
     }
@@ -68,8 +80,8 @@ public class NextBusHandlerTests {
     @Test
     public void nextBusHandler_ShouldChangeUserLastQueryTime() {
         long preQueryTime = user.getLastQueryTime();
-        when(update.getMessageData()).thenReturn("/nextbus a");
-        handler.handleMessage(user, update);
+        when(message.getMessageData()).thenReturn("/nextbus a");
+        handler.handleMessage(user, message);
         assertNotSame(preQueryTime, user.getLastQueryTime());
     }
 
@@ -79,8 +91,8 @@ public class NextBusHandlerTests {
      */
     @Test
     public void nextBusHandler_ShouldIgnoreInvalidSymbols() {
-        when(update.getMessageData()).thenReturn("/nextbus @#$%^&");
-        var simpleMessageResponse = handler.handleMessage(user, update).get(0);
+        when(message.getMessageData()).thenReturn("/nextbus @#$%^&");
+        var simpleMessageResponse = handler.handleMessage(user, message).get(0);
         var reply = simpleMessageResponse.getMessage();
         assertEquals("*Такой остановки нет.*", reply);
     }

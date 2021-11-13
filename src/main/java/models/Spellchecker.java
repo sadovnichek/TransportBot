@@ -11,17 +11,18 @@ public class Spellchecker {
     /**
      * Множество названий всех остановок
      */
-    private final Set<String> names;
+    private final Set<String> dictionary;
 
     public Spellchecker(Set<String> words) {
-        this.names = words;
+        this.dictionary = words;
     }
 
     public boolean isWordContainsIncorrectSymbols(String word) {
         var allowedSymbols = List.of('(', ')', ' ', '.', '-');
         for(int i = 0; i < word.length(); i++) {
             char currentChar = word.charAt(i);
-            if(!Character.isLetter(currentChar) && !allowedSymbols.contains(currentChar)
+            if(!Character.UnicodeBlock.of(currentChar).equals(Character.UnicodeBlock.CYRILLIC)
+                    && !allowedSymbols.contains(currentChar)
                     && !Character.isDigit(currentChar))
                 return true;
         }
@@ -38,12 +39,12 @@ public class Spellchecker {
     public List<String> tryGetCorrectName(String word) {
         List<String> result = new ArrayList<>();
         var variations = generateVariations(word);
-        for(String name : names) {
+        for(String name : dictionary) {
             if (name.contains(word))
                 result.add(name);
             else {
                 for(var candidate : variations)
-                    if(name.contains(candidate))
+                    if (editWord(candidate).contains(name))
                         result.add(name);
             }
         }
@@ -102,7 +103,7 @@ public class Spellchecker {
     {
         Map<Integer, String> distances = new TreeMap<>();
         List<String> result = new ArrayList<>();
-        for(String name: names) {
+        for(String name: dictionary) {
             var distance = LevenshteinDistance(word, name);
             if(distance < word.length())
                 distances.put(distance, name);
@@ -128,7 +129,7 @@ public class Spellchecker {
                 var charToChange = Character.toLowerCase(word.charAt(0));
                 word = charToChange + word.substring(1);
             }
-            if(names.contains(word))
+            if(dictionary.contains(word))
                 return word;
         }
         return word;
@@ -144,6 +145,8 @@ public class Spellchecker {
             word = word.replace("(Трамвай)", "");
         if (word.contains("России"))
             word = word.replace("России", "РФ");
+        if (word.contains("пр."))
+            word = word.replace("пр.", "проспект");
         return word.trim();
     }
 }

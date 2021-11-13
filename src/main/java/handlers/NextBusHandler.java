@@ -22,8 +22,8 @@ public class NextBusHandler implements Handler {
     private final BusStops busStops;
     private final Spellchecker spellchecker;
 
-    public NextBusHandler() {
-        busStops = new BusStops();
+    public NextBusHandler(Document doc) {
+        busStops = new BusStops(doc);
         spellchecker = new Spellchecker(busStops.getAllNames());
     }
 
@@ -101,6 +101,7 @@ public class NextBusHandler implements Handler {
     private String processDefinedDirection(String name, String direction, boolean onlyTram) {
         StringBuilder reply = new StringBuilder();
         try {
+            System.out.println("connect...");
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
             var timetables = busStops.getTimeTable(name, direction, onlyTram, doc);
             if (timetables.size() == 0)
@@ -122,13 +123,19 @@ public class NextBusHandler implements Handler {
      */
     private String processNonDefinedDirection(String name) {
         StringBuilder reply = new StringBuilder("*Укажите направление из возможных:*\n\n");
-        Set<String> directions = busStops.getDirections(name);
-        if (directions.size() == 0)
-            return "*Нет транспорта в ближайшее время.*";
-        for(String route : directions){
-            reply.append(route).append("\n");
-        }
-        return reply.toString();
+        try {
+            System.out.println("connect...");
+            Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
+            Set<String> directions = busStops.getDirections(name, doc);
+            if (directions.size() == 0)
+                return "*Нет транспорта в ближайшее время.*";
+            for(String route : directions){
+                reply.append(route).append("\n");
+            }
+            return reply.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } return null;
     }
 
     /**

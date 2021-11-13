@@ -23,16 +23,11 @@ public class BusStops {
     /**
      * Конструктор класса. Инициализирует значение поля busStops
      */
-    public BusStops() {
-        try {
-            Document doc = Jsoup.connect("https://www.bustime.ru/ekaterinburg/stop/").get();
-            Elements headLines = doc.getElementsByClass("ui fluid vertical menu")
-                    .select("a.item");
-            for (Element headline : headLines) {
-                busStops.put(headline.text(), headline.attr("href"));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public BusStops(Document doc) {
+        Elements headLines = doc.getElementsByClass("ui fluid vertical menu")
+                .select("a.item");
+        for (Element headline : headLines) {
+            busStops.put(headline.text(), headline.attr("href"));
         }
     }
 
@@ -58,26 +53,21 @@ public class BusStops {
      * @return множество направлений, куда можно попасть из
      * остановки "name"
      */
-    public Set<String> getDirections(String name) {
+    public Set<String> getDirections(String name, Document doc) {
         Set<String> result = new HashSet<>();
-        try {
-            Document doc = Jsoup.connect(busStops.get(name)).get();
-            Elements headLines = doc.getElementsByClass("ui header");
-            for (Element headline : headLines) {
-                String text = headline.text();
-                if(!text.equals("конечная")) {
-                    var timeTables = Stream.concat(getTimeTable(name, text, false, doc).stream(),
-                                    getTimeTable(name, text, true, doc).stream())
-                            .collect(Collectors.toList());
-                    for (TimeTable t : timeTables) {
-                        result.add(text + ((t.isTram()) ? " (Трамвай)" : "") );
-                    }
+        Elements headLines = doc.getElementsByClass("ui header");
+        for (Element headline : headLines) {
+            String text = headline.text();
+            if(!text.equals("конечная")) {
+                var timeTables = Stream.concat(getTimeTable(name, text, false, doc).stream(),
+                                getTimeTable(name, text, true, doc).stream())
+                        .collect(Collectors.toList());
+                for (TimeTable t : timeTables) {
+                    result.add(text + ((t.isTram()) ? " (Трамвай)" : "") );
                 }
-            } return result;
-        } catch (IOException e) {
-            e.printStackTrace();
+            }
         }
-        return null;
+        return result;
     }
 
     /**
