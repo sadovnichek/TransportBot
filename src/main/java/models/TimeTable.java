@@ -51,7 +51,7 @@ public class TimeTable {
         return timeTable;
     }
 
-    private List<String> splitLongString(String route){
+    public List<String> splitLongString(String route){
         int currentPos = 0;
         List<String> result = new ArrayList<>();
         while(currentPos != route.length()) {

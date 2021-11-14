@@ -37,9 +37,12 @@ public class BusStops {
                     .select("a.ui.button.busnumber");
             for(Element element : headlines){
                 var attr = element.attr("href");
-                if(attr.contains("#bus") && !attr.contains("bus-intercity"))
+                if(attr.contains("#bus") && !attr.contains("bus-intercity")) {
                     routes.add(element.text().split("[\\s]+")[0]);
+                    System.out.print(element.text().split("[\\s]+")[0] + " ");
+                }
             }
+            System.out.println("Size: " + routes.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
