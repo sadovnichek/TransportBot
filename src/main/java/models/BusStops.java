@@ -5,7 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,18 +31,16 @@ public class BusStops {
         for (Element headline : headLines) {
             busStops.put(headline.text(), headline.attr("href"));
         }
+        File file = new File("src/main/resources/bus_routes.txt");
         try {
-            Document routesPage = Jsoup.connect("https://www.bustime.ru/#bus").get();
-            Elements headlines = routesPage.getElementsByTag("a")
-                    .select("a.ui.button.busnumber");
-            for(Element element : headlines){
-                var attr = element.attr("href");
-                if(attr.contains("#bus") && !attr.contains("bus-intercity")) {
-                    routes.add(element.text().split("[\\s]+")[0]);
-                    System.out.print(element.text().split("[\\s]+")[0] + " ");
-                }
+            FileReader fr = new FileReader(file);
+            BufferedReader reader = new BufferedReader(fr);
+            String line = reader.readLine();
+            while (line != null) {
+                var busRoutes = line.split("[\\s]+");
+                this.routes.addAll(List.of(busRoutes));
+                line = reader.readLine();
             }
-            System.out.println("Size: " + routes.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
