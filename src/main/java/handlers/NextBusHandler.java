@@ -66,25 +66,26 @@ public class NextBusHandler implements Handler {
             if(suggestedWords.size() == 1)
                 name = suggestedWords.get(0);
             else {
-                suggestedWords.addAll(spellchecker.sortByEditorDistance(name));
-                return "*Такой остановки нет. Возможно, вы имели в виду:*\n"
-                        + printSuggestions(suggestedWords);
+                if (suggestedWords.size() < 5)
+                    suggestedWords.addAll(spellchecker.sortByEditorDistance(name));
+                return "*Такой остановки нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
             }
         } if(length == 2) { // correct
             boolean onlyTram = words[1].contains("(Трамвай)");
             var direction = spellchecker.editWord(words[1]);
-            if(spellchecker.isWordContainsIncorrectSymbols(direction))
+            if (spellchecker.isWordContainsIncorrectSymbols(direction))
                 return "*Такого направления нет.*";
-            if(busStops.getReferenceByName(direction) == null) {
-                System.out.println(direction);
+            if (busStops.getReferenceByName(direction) == null) {
                 var suggestedWords = spellchecker.tryGetCorrectName(direction);
-                if(suggestedWords.size() == 1)
+                if (suggestedWords.size() == 1)
                     direction = suggestedWords.get(0);
                 else {
-                    suggestedWords.addAll(spellchecker.sortByEditorDistance(direction));
+                    if (suggestedWords.size() < 5)
+                        suggestedWords.addAll(spellchecker.sortByEditorDistance(direction));
                     return "*Такого направления нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
                 }
-            } return processDefinedDirection(name, direction, onlyTram);
+            }
+            return processDefinedDirection(name, direction, onlyTram);
         }
         else if (length == 1) // if not defined direction
             return processNonDefinedDirection(name);
@@ -101,7 +102,6 @@ public class NextBusHandler implements Handler {
     private String processDefinedDirection(String name, String direction, boolean onlyTram) {
         StringBuilder reply = new StringBuilder();
         try {
-            System.out.println("connect...");
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
             var timetables = busStops.getTimeTable(name, direction, onlyTram, doc);
             if (timetables.size() == 0)
@@ -122,9 +122,8 @@ public class NextBusHandler implements Handler {
      * @return строка с названиями направлений
      */
     private String processNonDefinedDirection(String name) {
-        StringBuilder reply = new StringBuilder("*Укажите направление из возможных:*\n\n");
+        StringBuilder reply = new StringBuilder("*" + name + "\n\nУкажите направление из возможных:*\n");
         try {
-            System.out.println("connect...");
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
             Set<String> directions = busStops.getDirections(name, doc);
             if (directions.size() == 0)

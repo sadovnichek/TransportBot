@@ -38,7 +38,6 @@ public class Bot extends TelegramLongPollingBot {
 
     private Document readDocument(String url) {
         try {
-            System.out.println("connect...");
             return Jsoup.connect(url).get();
         } catch (IOException e) {
             e.printStackTrace();

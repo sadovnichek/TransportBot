@@ -44,7 +44,7 @@ public class Spellchecker {
                 result.add(name);
             else {
                 for(var candidate : variations)
-                    if (editWord(candidate).contains(name))
+                    if (name.contains(editWord(candidate)))
                         result.add(name);
             }
         }
@@ -105,7 +105,7 @@ public class Spellchecker {
         List<String> result = new ArrayList<>();
         for(String name: dictionary) {
             var distance = LevenshteinDistance(word, name);
-            if(distance < word.length())
+            if(distance < word.length() / 2)
                 distances.put(distance, name);
         }
         var count = min(5, distances.size());

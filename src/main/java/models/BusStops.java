@@ -18,16 +18,30 @@ public class BusStops {
      * Здесь хранятся названия остановок в виде ключей
      * и ссылки на них же на сайте bustime.ru в виде значений
      */
-    private Map<String, String> busStops = new HashMap<>();
+    private final Map<String, String> busStops = new HashMap<>();
+    private final Set<String> routes;
 
     /**
      * Конструктор класса. Инициализирует значение поля busStops
      */
     public BusStops(Document doc) {
+        this.routes = new HashSet<>();
         Elements headLines = doc.getElementsByClass("ui fluid vertical menu")
                 .select("a.item");
         for (Element headline : headLines) {
             busStops.put(headline.text(), headline.attr("href"));
+        }
+        try {
+            Document routesPage = Jsoup.connect("https://www.bustime.ru/#bus").get();
+            Elements headlines = routesPage.getElementsByTag("a")
+                    .select("a.ui.button.busnumber");
+            for(Element element : headlines){
+                var attr = element.attr("href");
+                if(attr.contains("#bus") && !attr.contains("bus-intercity"))
+                    routes.add(element.text().split("[\\s]+")[0]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -87,7 +101,7 @@ public class BusStops {
             if(timetableText.startsWith("табло " + direction) && timetableText.contains("время")) {
                 timetableText = transformData(timetableText, direction);
                 if (timetableText.equals("")) continue;
-                TimeTable timeTable = new TimeTable(name, direction, timetableText);
+                TimeTable timeTable = new TimeTable(name, direction, timetableText, routes);
                 if(onlyTram && timeTable.isTram())
                     result.add(timeTable);
                 else if (!onlyTram && !timeTable.isTram())
