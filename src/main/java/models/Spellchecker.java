@@ -17,6 +17,10 @@ public class Spellchecker {
         this.dictionary = words;
     }
 
+    /**
+     * Контроль за тем, что в названии нет недопустимых символов
+     * @return true - слово содержит запрещённые символы, false - в противном случае
+     */
     public boolean isWordContainsIncorrectSymbols(String word) {
         var allowedSymbols = List.of('(', ')', ' ', '.', '-');
         for(int i = 0; i < word.length(); i++) {
@@ -51,6 +55,10 @@ public class Spellchecker {
         return result;
     }
 
+    /**
+     * Перебирает все варианты расстановки заглавных букв на множестве слов в предложении
+     * @return список вариантов
+     */
     private List<String> generateVariations(String word){
         List<String> result = new ArrayList<>();
         var wordParts = word.split("[\\s]+");
@@ -80,8 +88,7 @@ public class Spellchecker {
      * @param second - слово, которое мы хотим получить
      * @return - число - искомая метрика
      */
-    private int LevenshteinDistance(String first, String second)
-    {
+    private int LevenshteinDistance(String first, String second) {
         var opt = new int[first.length() + 1][second.length() + 1];
         for (var i = 0; i <= first.length(); i++) opt[i][0] = i;
         for (var i = 0; i <= second.length(); i++) opt[0][i] = i;
@@ -99,8 +106,7 @@ public class Spellchecker {
      * Выводит слова в порядке возрастания метрики Левенштейна, максимум - 5 слов
      * @param word - название остановки/направление движения
      */
-    public List<String> sortByEditorDistance(String word)
-    {
+    public List<String> sortByEditorDistance(String word) {
         Map<Integer, String> distances = new TreeMap<>();
         List<String> result = new ArrayList<>();
         for(String name: dictionary) {

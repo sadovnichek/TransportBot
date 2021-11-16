@@ -34,8 +34,7 @@ public class SimpleMessageResponse implements ResponseMessage{
         return sendMessage;
     }
 
-    public String getMessage()
-    {
+    public String getMessage() {
         return this.message;
     }
 }
