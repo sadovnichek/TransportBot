@@ -1,5 +1,7 @@
 package models;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -51,6 +53,13 @@ public class TimeTable {
         return timeTable;
     }
 
+    /**
+     * Некоторые маршруты "склеиваются" в одну большую строку.
+     * Чтобы этого избежать, разделим её на составные части - отдельные маршруты из
+     * множества routes.
+     * @param route - "длинная" строка
+     * @return список маршрутов
+     */
     public List<String> splitLongString(String route){
         int currentPos = 0;
         List<String> result = new ArrayList<>();
@@ -79,6 +88,21 @@ public class TimeTable {
     }
 
     /**
+     * Так как расписание может содержать неточности,
+     * выводим не точное время, а диапазон +/- 2 минуты
+     * @param time строковое представление времени в виде: hh:mm
+     * @return строка вида hh:mm - hh:mm
+     */
+    private String getDataRange(String time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
+        LocalTime delta = LocalTime.of(0, 2);
+        LocalTime currentTime = LocalTime.parse(time, formatter);
+        var max = currentTime.plusMinutes(2);
+        var min = currentTime.minusMinutes(2);
+        return min.toString() + " - " + max.toString();
+    }
+
+    /**
      * Перегрузка toString() для форматированного вывода.
      */
     @Override
@@ -87,21 +111,18 @@ public class TimeTable {
         headline += (isTram) ? " (Трамвай)*\n" : "*\n";
         var result = new StringBuilder(headline);
         for (var time : timeTable.keySet()) {
-            result.append(time).append("    ");
+            String timeRange = getDataRange(time);
+            result.append(timeRange).append("    ");
             int size = timeTable.get(time).size();
             for(int i = 0; i < size; i++) {
                 String route = timeTable.get(time).get(i);
                 if(route.length() > 3 && !route.contains("Троллейбус") && !isTram) {
                     var routesList = splitLongString(route);
-                    for(int j = 0; j < routesList.size(); j++) {
-                        String space = (j != routesList.size() - 1) ? ", " : " ";
-                        result.append(routesList.get(j)).append(space);
-                    }
+                    for (String s : routesList)
+                        result.append(s).append(" ");
                 }
-                else {
-                    String space = (i != size - 1) ? ", " : " "; // space by comma or not, if last
-                    result.append(route).append(space);
-                }
+                else
+                    result.append(route).append(" ");
             }
             result.append('\n');
         }

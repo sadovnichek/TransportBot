@@ -58,7 +58,8 @@ public class NextBusHandlerTests {
                 false, doc);
         assertEquals(1, suggestions.size());
         var timetable = suggestions.get(0).toString();
-        Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n16:13    Троллейбус-11 \n"));
+        Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n" +
+                "16:11 - 16:15    Троллейбус-11 \n"));
     }
 
     /**

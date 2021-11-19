@@ -84,8 +84,7 @@ public class NextBusHandler implements Handler {
                         suggestedWords.addAll(spellchecker.sortByEditorDistance(direction));
                     return "*Такого направления нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
                 }
-            }
-            return processDefinedDirection(name, direction, onlyTram);
+            } return processDefinedDirection(name, direction, onlyTram);
         }
         else if (length == 1) // if not defined direction
             return processNonDefinedDirection(name);
@@ -104,7 +103,6 @@ public class NextBusHandler implements Handler {
         try {
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
             var timetables = busStops.getTimeTable(name, direction, onlyTram, doc);
-            var x = timetables.get(0).splitLongString("01424");
             if (timetables.size() == 0)
                 return "*Нет транспорта в ближайшее время.*";
             for(TimeTable timetable : timetables){

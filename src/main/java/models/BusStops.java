@@ -1,6 +1,5 @@
 package models;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -105,7 +104,7 @@ public class BusStops {
                 TimeTable timeTable = new TimeTable(name, direction, timetableText, routes);
                 if(onlyTram && timeTable.isTram())
                     result.add(timeTable);
-                else if (!onlyTram && !timeTable.isTram())
+                else
                     result.add(timeTable);
             }
         } return result;

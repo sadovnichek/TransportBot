@@ -1,7 +1,6 @@
 package models;
 
 import java.util.*;
-
 import static java.lang.Math.min;
 
 /**
@@ -88,7 +87,7 @@ public class Spellchecker {
      * @param second - слово, которое мы хотим получить
      * @return - число - искомая метрика
      */
-    private int LevenshteinDistance(String first, String second) {
+    private int countEditorDistance(String first, String second) {
         var opt = new int[first.length() + 1][second.length() + 1];
         for (var i = 0; i <= first.length(); i++) opt[i][0] = i;
         for (var i = 0; i <= second.length(); i++) opt[0][i] = i;
@@ -110,7 +109,7 @@ public class Spellchecker {
         Map<Integer, String> distances = new TreeMap<>();
         List<String> result = new ArrayList<>();
         for(String name: dictionary) {
-            var distance = LevenshteinDistance(word, name);
+            var distance = countEditorDistance(word, name);
             if(distance < word.length() / 2)
                 distances.put(distance, name);
         }

@@ -5,12 +5,17 @@ import models.Handler;
 import models.UpdateReceiver;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiValidationException;
 import wrappers.ResponseMessage;
 import wrappers.MessageData;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import wrappers.SimpleMessageResponse;
 
 import java.io.IOException;
 import java.util.List;
