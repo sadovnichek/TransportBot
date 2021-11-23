@@ -77,6 +77,8 @@ public class Spellchecker {
         List<String> result = new ArrayList<>();
         for(String name: dictionary) {
             var distance = countEditorDistance(word, name);
+            if(distance == 0)
+                return List.of(name);
             if(distance < word.length() / 2)
                 distances.put(distance, name);
         }
