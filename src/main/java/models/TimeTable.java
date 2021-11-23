@@ -95,7 +95,6 @@ public class TimeTable {
      */
     private String getDataRange(String time) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
-        LocalTime delta = LocalTime.of(0, 2);
         LocalTime currentTime = LocalTime.parse(time, formatter);
         var max = currentTime.plusMinutes(2);
         var min = currentTime.minusMinutes(2);
@@ -119,10 +118,10 @@ public class TimeTable {
                 if(route.length() > 3 && !route.contains("Троллейбус") && !isTram) {
                     var routesList = splitLongString(route);
                     for (String s : routesList)
-                        result.append(s).append(" ");
+                        result.append(s).append("; ");
                 }
                 else
-                    result.append(route).append(" ");
+                    result.append(route).append("; ");
             }
             result.append('\n');
         }

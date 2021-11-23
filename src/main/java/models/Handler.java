@@ -1,7 +1,7 @@
 package models;
 
-import wrappers.ResponseMessage;
-import wrappers.MessageData;
+import wrappers.MessageResponse;
+import wrappers.Message;
 
 import java.util.List;
 
@@ -17,5 +17,5 @@ public interface Handler {
      * @param message - сообщение от пользователя
      * @return список ответами от бота
      */
-    List<ResponseMessage> handleMessage(User user, MessageData message);
+    List<MessageResponse> handleMessage(User user, Message message);
 }

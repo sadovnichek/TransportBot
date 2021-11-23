@@ -3,9 +3,9 @@ package handlers;
 import models.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import wrappers.ResponseMessage;
+import wrappers.MessageResponse;
 import wrappers.SimpleMessageResponse;
-import wrappers.MessageData;
+import wrappers.Message;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,70 +35,48 @@ public class NextBusHandler implements Handler {
         return "/nextbus";
     }
 
-    /**
-     * Принимает сообщение от пользователя, возвращает ответ
-     * @param user - сам пользователь
-     * @param message - сообщение от пользователя
-     * @return сообщения, сгенерированные ботом
-     */
     @Override
-    public List<ResponseMessage> handleMessage(User user, MessageData message) {
-        String data = message.getMessageData().replace("/nextbus", "");
-        String reply = parseData(data);
-        SimpleMessageResponse messageResponse = new SimpleMessageResponse(user.getChatId(), reply);
-        messageResponse.enableMarkdown();
-        return List.of(messageResponse);
-    }
-
-    /**
-     * Обрабатывает данные, полученные от пользователя
-     * @param data - сообщение от пользователя без команды /nextbus
-     * @return генерирует ответ - строку
-     */
-    private String parseData(String data) {
+    public List<MessageResponse> handleMessage(User user, Message message) {
+        String data = message.getMessageData();
+        var response = new SimpleMessageResponse(user.getChatId());
         String[] words = data.trim().split("[:]+");
-        int length = words.length;
-        String name = spellchecker.editWord(words[0]);
+        String name = spellchecker.normalizeWord(words[0]);
         if(spellchecker.isWordContainsIncorrectSymbols(name))
-            return "*Такой остановки нет.*";
+            return List.of(response.setText("*Такой остановки нет.*"));
         if(busStops.getReferenceByName(name) == null) {
-            var suggestedWords = spellchecker.tryGetCorrectName(name);
+            var suggestedWords = spellchecker.getSuggestions(name);
             if(suggestedWords.size() == 1)
                 name = suggestedWords.get(0);
             else {
-                if (suggestedWords.size() < 5)
-                    suggestedWords.addAll(spellchecker.sortByEditorDistance(name));
-                return "*Такой остановки нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
+                var reply = "*Такой остановки нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
+                return List.of(response.setText(reply)); //!
             }
-        } if(length == 2) { // correct
-            boolean onlyTram = words[1].contains("(Трамвай)");
-            var direction = spellchecker.editWord(words[1]);
-            if (spellchecker.isWordContainsIncorrectSymbols(direction))
-                return "*Такого направления нет.*";
-            if (busStops.getReferenceByName(direction) == null) {
-                var suggestedWords = spellchecker.tryGetCorrectName(direction);
-                if (suggestedWords.size() == 1)
-                    direction = suggestedWords.get(0);
-                else {
-                    if (suggestedWords.size() < 5)
-                        suggestedWords.addAll(spellchecker.sortByEditorDistance(direction));
-                    return "*Такого направления нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
-                }
-            } return processDefinedDirection(name, direction, onlyTram);
         }
-        else if (length == 1) // if not defined direction
-            return processNonDefinedDirection(name);
-        return "*Произошла неизвестная ошибка.*";
+        if(words.length == 2) // defined direction
+            return List.of(response.setText(processDefinedDirection(name, words[1])));
+        if (words.length == 1) // if not defined direction
+            return List.of(response.setText(processNonDefinedDirection(name))); //!
+        return List.of(response);
     }
 
     /**
      * Обрабатывает входные данные, если указаны название и направление.
      * @param name имя остановки
      * @param direction направление - следующая остановка по пути маршрута
-     * @param onlyTram - является ли остановка трамвайной
      * @return расписание в виде строки
      */
-    private String processDefinedDirection(String name, String direction, boolean onlyTram) {
+    private String processDefinedDirection(String name, String direction) {
+        boolean onlyTram = direction.contains("(Трамвай)");
+        direction = spellchecker.normalizeWord(direction);
+        if (spellchecker.isWordContainsIncorrectSymbols(direction))
+            return "*Такого направления нет.*";
+        if (busStops.getReferenceByName(direction) == null) {
+            var suggestedWords = spellchecker.getSuggestions(direction);
+            if (suggestedWords.size() == 1)
+                direction = suggestedWords.get(0);
+            else
+                return "*Такого направления нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
+        }
         StringBuilder reply = new StringBuilder();
         try {
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
@@ -111,8 +89,8 @@ public class NextBusHandler implements Handler {
             return reply.toString();
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     /**

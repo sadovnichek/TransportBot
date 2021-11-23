@@ -3,7 +3,7 @@ import handlers.StartHandler;
 import models.User;
 import org.junit.Before;
 import org.junit.Test;
-import wrappers.MessageData;
+import wrappers.Message;
 
 import static junit.framework.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -12,14 +12,14 @@ public class SupportHandlersTest {
     private User user;
     private StartHandler startHandler;
     private HelpHandler helpHandler;
-    private MessageData update;
+    private Message update;
 
     @Before
     public void setUp() {
         user = new User(123);
         startHandler = new StartHandler();
         helpHandler = new HelpHandler();
-        update = mock(MessageData.class);
+        update = mock(Message.class);
     }
 
     /**
@@ -49,7 +49,7 @@ public class SupportHandlersTest {
     @Test
     public void startHandler_CheckMessage() {
         var responses = startHandler.handleMessage(user, update);
-        var actual = responses.get(0).getMessage();
+        var actual = responses.get(0).getMessageText();
         var expected = "*Привет! Я - Transport Bot\n" +
                 "Помощь тут - /help*";
         assertSame(expected, actual);
@@ -82,7 +82,7 @@ public class SupportHandlersTest {
     @Test
     public void helpHandler_CheckMessage() {
         var responses = helpHandler.handleMessage(user, update);
-        var actual = responses.get(0).getMessage();
+        var actual = responses.get(0).getMessageText();
         assertTrue(actual.startsWith("*Я здесь, чтобы помочь тебе."));
     }
 }

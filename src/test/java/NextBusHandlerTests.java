@@ -6,7 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Before;
 import org.junit.Test;
-import wrappers.MessageData;
+import wrappers.Message;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 public class NextBusHandlerTests {
     private User user;
     private NextBusHandler handler;
-    private MessageData message;
+    private Message message;
     private BusStops busStops;
 
     @Before
@@ -28,7 +28,7 @@ public class NextBusHandlerTests {
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
         user = new User(123);
         handler = new NextBusHandler(doc);
-        message = mock(MessageData.class);
+        message = mock(Message.class);
         busStops = new BusStops(doc);
     }
 
@@ -59,7 +59,7 @@ public class NextBusHandlerTests {
         assertEquals(1, suggestions.size());
         var timetable = suggestions.get(0).toString();
         Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n" +
-                "16:11 - 16:15    Троллейбус-11 \n"));
+                "16:11 - 16:15    Троллейбус-11; \n"));
     }
 
     /**
@@ -69,7 +69,7 @@ public class NextBusHandlerTests {
     public void nextBusHandler_ShouldReplyIfBusStop_NotExist() {
         when(message.getMessageData()).thenReturn("Морской путь");
         var simpleMessageResponse = handler.handleMessage(user, message).get(0);
-        var reply = simpleMessageResponse.getMessage();
+        var reply = simpleMessageResponse.getMessageText();
         Assert.assertTrue(reply.contains("Такой остановки нет. Возможно, вы имели в виду:"));
     }
 
@@ -94,7 +94,7 @@ public class NextBusHandlerTests {
     public void nextBusHandler_ShouldIgnoreInvalidSymbols() {
         when(message.getMessageData()).thenReturn("/nextbus @#$%^&");
         var simpleMessageResponse = handler.handleMessage(user, message).get(0);
-        var reply = simpleMessageResponse.getMessage();
+        var reply = simpleMessageResponse.getMessageText();
         assertEquals("*Такой остановки нет.*", reply);
     }
 }

@@ -5,17 +5,12 @@ import models.Handler;
 import models.UpdateReceiver;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiValidationException;
-import wrappers.ResponseMessage;
-import wrappers.MessageData;
+import wrappers.MessageResponse;
+import wrappers.Message;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import wrappers.SimpleMessageResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -54,8 +49,8 @@ public class Bot extends TelegramLongPollingBot {
      * Отправляет сообщения пользователю
      * @param messages - список сообщений, сгенерированных ботом
      */
-    private synchronized void sendMessages(List<ResponseMessage> messages) {
-        for (ResponseMessage message : messages) {
+    private synchronized void sendMessages(List<MessageResponse> messages) {
+        for (MessageResponse message : messages) {
             try {
                 execute(message.createMessage());
             } catch (TelegramApiException e) {
@@ -70,8 +65,8 @@ public class Bot extends TelegramLongPollingBot {
      */
     @Override
     public void onUpdateReceived(Update update) {
-        MessageData wrappedUpdate = new MessageData(update);
-        List<ResponseMessage> responseMessages = updateReceiver.handle(wrappedUpdate);
+        Message wrappedUpdate = new Message(update);
+        List<MessageResponse> responseMessages = updateReceiver.handle(wrappedUpdate);
         sendMessages(responseMessages);
     }
 

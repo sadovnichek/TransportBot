@@ -2,7 +2,7 @@ package wrappers;
 
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 
-public interface ResponseMessage {
+public interface MessageResponse {
     BotApiMethod createMessage();
-    String getMessage();
+    String getMessageText();
 }

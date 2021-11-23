@@ -1,7 +1,7 @@
 package models;
 
-import wrappers.ResponseMessage;
-import wrappers.MessageData;
+import wrappers.MessageResponse;
+import wrappers.Message;
 import wrappers.SimpleMessageResponse;
 
 import java.util.Collections;
@@ -37,10 +37,10 @@ public class UpdateReceiver {
      * Добавляет пользователя в словарь.
      * Вызывает обработчик команды и обрабатывает её
      * @param message принимаемое сообщение от пользователя
-     * @see MessageData
+     * @see Message
      * @return список сообщений, сгенерированных ботом
      * */
-    public List<ResponseMessage> handle(MessageData message) {
+    public List<MessageResponse> handle(Message message) {
         long chatId = message.getChatId();
         if (!chatIdToUser.containsKey(chatId))
             chatIdToUser.put(chatId, new User(chatId));

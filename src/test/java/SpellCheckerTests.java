@@ -27,7 +27,7 @@ public class SpellCheckerTests {
     @Test
     public void spellchecker_ShouldSuggestContinueOfWord() {
         var word = "Ленина";
-        var suggestions = spellchecker.tryGetCorrectName(word);
+        var suggestions = spellchecker.tryGetCompleteName(word);
         Assert.assertEquals(2, suggestions.size());
         Assert.assertTrue(suggestions.contains("Проспект Ленина (Карла Либкнехта)"));
         Assert.assertTrue(suggestions.contains("Уральских Рабочих (Ленина)"));
@@ -51,7 +51,7 @@ public class SpellCheckerTests {
     @Test
     public void spellchecker_ShouldEditFirstLetters() {
         var word = "оперный Театр";
-        var suggestions = spellchecker.tryGetCorrectName(word);
+        var suggestions = spellchecker.getSuggestions(word);
         Assert.assertTrue(suggestions.contains("Оперный театр"));
     }
 }

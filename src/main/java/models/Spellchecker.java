@@ -39,44 +39,11 @@ public class Spellchecker {
      * @param word - название остановки/направления
      * @return список с возможными исправлениями
      */
-    public List<String> tryGetCorrectName(String word) {
+    public List<String> tryGetCompleteName(String word) {
         List<String> result = new ArrayList<>();
-        var variations = generateVariations(word);
         for(String name : dictionary) {
             if (name.contains(word))
                 result.add(name);
-            else {
-                for(var candidate : variations)
-                    if (name.contains(editWord(candidate)))
-                        result.add(name);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Перебирает все варианты расстановки заглавных букв на множестве слов в предложении
-     * @return список вариантов
-     */
-    private List<String> generateVariations(String word){
-        List<String> result = new ArrayList<>();
-        var wordParts = word.split("[\\s]+");
-        var subsetNumber = Math.pow(2.0, wordParts.length);
-        for(int i = 0; i < subsetNumber; i++) {
-            StringBuilder mask = new StringBuilder(Integer.toBinaryString(i));
-            while(mask.length() != wordParts.length) {
-                mask.insert(0, "0");
-            }
-            StringBuilder corrected = new StringBuilder();
-            for(int j  = 0; j < mask.length(); j++) {
-                var currentWord = wordParts[j];
-                    if (mask.charAt(j) == '1') {
-                        currentWord = replaceFirstLetter(wordParts[j]);
-                    }
-                    corrected.append(currentWord).append(" ");
-            }
-            corrected = new StringBuilder(corrected.toString().trim());
-            result.add(corrected.toString());
         }
         return result;
     }
@@ -93,7 +60,7 @@ public class Spellchecker {
         for (var i = 0; i <= second.length(); i++) opt[0][i] = i;
         for (var i = 1; i <= first.length(); i++)
             for (var j = 1; j <= second.length(); j++) {
-                if (first.charAt(i - 1) == second.charAt(j - 1))
+                if (Character.toUpperCase(first.charAt(i - 1)) == Character.toUpperCase(second.charAt(j - 1)))
                     opt[i][j] = opt[i - 1][j - 1];
                 else
                     opt[i][j] = min(1 + opt[i - 1][j], min(1 + opt[i - 1][j - 1], 1 + opt[i][j - 1]));
@@ -122,28 +89,9 @@ public class Spellchecker {
     }
 
     /**
-     * Меняет регистр первой буквы слова word на противоположный
-     */
-    private String replaceFirstLetter(String word) {
-        if(Character.isLetter(word.charAt(0))) {
-            if(Character.isLowerCase(word.charAt(0))) {
-                var charToChange = Character.toUpperCase(word.charAt(0));
-                word = charToChange + word.substring(1);
-            }
-            else if(Character.isUpperCase(word.charAt(0))) {
-                var charToChange = Character.toLowerCase(word.charAt(0));
-                word = charToChange + word.substring(1);
-            }
-            if(dictionary.contains(word))
-                return word;
-        }
-        return word;
-    }
-
-    /**
      * Заменяет наиболее часто встречающиеся сокращения на правильные
      */
-    public String editWord(String word){
+    public String normalizeWord(String word){
         if (word.contains("площадь"))
             word = word.replace("площадь", "пл.");
         if (word.contains("(Трамвай)"))
@@ -153,5 +101,17 @@ public class Spellchecker {
         if (word.contains("пр."))
             word = word.replace("пр.", "проспект");
         return word.trim();
+    }
+
+    /**
+     * Получает дополненные и исправленные слова в рекомендации
+     * @param word название или направление
+     * @return список предложений по исправлению
+     */
+    public List<String> getSuggestions(String word){
+        var suggestedWords = tryGetCompleteName(word);
+        var correctedWords = sortByEditorDistance(word);
+        suggestedWords.addAll(correctedWords);
+        return suggestedWords;
     }
 }

@@ -2,9 +2,9 @@ package handlers;
 
 import models.Handler;
 import models.User;
-import wrappers.ResponseMessage;
+import wrappers.MessageResponse;
 import wrappers.SimpleMessageResponse;
-import wrappers.MessageData;
+import wrappers.Message;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class HelpHandler implements Handler {
      * @return сообщение-помощь, сгенерированное ботом
      */
     @Override
-    public List<ResponseMessage> handleMessage(User user, MessageData message) {
+    public List<MessageResponse> handleMessage(User user, Message message) {
         String startText = "*Я здесь, чтобы помочь тебе.*" +
                 "\n\n*Базовые команды*\n" +
                 "/start - начало работы\n" +
@@ -39,7 +39,6 @@ public class HelpHandler implements Handler {
                 "Бот попробует вам его подсказать\n";
 
         SimpleMessageResponse startMessage = new SimpleMessageResponse(user.getChatId(), startText);
-        startMessage.enableMarkdown();
         return List.of(startMessage);
     }
 }

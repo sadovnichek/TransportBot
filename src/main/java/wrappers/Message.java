@@ -5,7 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 /**
  * Класс-обёртка над сообщением
  */
-public class MessageData {
+public class Message {
     private long chatId;
     private String messageData;
     private String command;
@@ -19,7 +19,6 @@ public class MessageData {
      * Сохраняет сообщение без команды
      */
     public String getMessageData() {
-        if (hasCommand) return messageData.replace(command, "");
         return messageData;
     }
 
@@ -32,14 +31,14 @@ public class MessageData {
     /**
      * Обрабатывает сообщение, вычленяет команду для обработки
      */
-    public MessageData(Update update) {
+    public Message(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             messageData = update.getMessage().getText();
             chatId = update.getMessage().getChatId();
-
             if(messageData.charAt(0) == '/') {
                 hasCommand = true;
                 command = messageData.split("[\\s]")[0];
+                messageData = messageData.replace(command, "").trim();
             }
         }
     }
