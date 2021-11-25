@@ -1,18 +1,19 @@
 package models;
 
 import java.util.*;
+
 import static java.lang.Math.min;
 
 /**
- * Класс проверки правописания
+ * Класс, предлагающий исправления при опечатках/ошибках
  */
-public class Spellchecker {
+public class Corrector {
     /**
      * Множество названий всех остановок
      */
     private final Set<String> dictionary;
 
-    public Spellchecker(Set<String> words) {
+    public Corrector(Set<String> words) {
         this.dictionary = words;
     }
 
@@ -39,7 +40,7 @@ public class Spellchecker {
      * @param word - название остановки/направления
      * @return список с возможными исправлениями
      */
-    public List<String> tryGetCompleteName(String word) {
+    private List<String> tryGetCompleteName(String word) {
         List<String> result = new ArrayList<>();
         for(String name : dictionary) {
             if (name.contains(word))
@@ -72,14 +73,14 @@ public class Spellchecker {
      * Выводит слова в порядке возрастания метрики Левенштейна, максимум - 5 слов
      * @param word - название остановки/направление движения
      */
-    public List<String> sortByEditorDistance(String word) {
+    private List<String> sortByEditorDistance(String word) {
         Map<Integer, String> distances = new TreeMap<>();
         List<String> result = new ArrayList<>();
         for(String name: dictionary) {
             var distance = countEditorDistance(word, name);
             if(distance == 0)
                 return List.of(name);
-            if(distance < word.length() / 2)
+            if(distance < Math.min(word.length(), name.length()))
                 distances.put(distance, name);
         }
         var count = min(5, distances.size());
@@ -88,21 +89,6 @@ public class Spellchecker {
             result.add(distances.get(key));
         }
         return result;
-    }
-
-    /**
-     * Заменяет наиболее часто встречающиеся сокращения на правильные
-     */
-    public String normalizeWord(String word){
-        if (word.contains("площадь"))
-            word = word.replace("площадь", "пл.");
-        if (word.contains("(Трамвай)"))
-            word = word.replace("(Трамвай)", "");
-        if (word.contains("России"))
-            word = word.replace("России", "РФ");
-        if (word.contains("пр."))
-            word = word.replace("пр.", "проспект");
-        return word.trim();
     }
 
     /**

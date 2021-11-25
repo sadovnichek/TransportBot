@@ -20,11 +20,11 @@ public class NextBusHandler implements Handler {
      * Этот класс хранит словарь <название остановки> : <ссылка на неё на сайте bustime.ru>
      */
     private final BusStops busStops;
-    private final Spellchecker spellchecker;
+    private final Corrector corrector;
 
     public NextBusHandler(Document doc) {
         busStops = new BusStops(doc);
-        spellchecker = new Spellchecker(busStops.getAllNames());
+        corrector = new Corrector(busStops.getAllNames());
     }
 
     /**
@@ -40,11 +40,11 @@ public class NextBusHandler implements Handler {
         String data = message.getMessageData();
         var response = new SimpleMessageResponse(user.getChatId());
         String[] words = data.trim().split("[:]+");
-        String name = spellchecker.normalizeWord(words[0]);
-        if(spellchecker.isWordContainsIncorrectSymbols(name))
+        String name = normalizeWord(words[0]);
+        if(corrector.isWordContainsIncorrectSymbols(name))
             return List.of(response.setText("*Такой остановки нет.*"));
         if(busStops.getReferenceByName(name) == null) {
-            var suggestedWords = spellchecker.getSuggestions(name);
+            var suggestedWords = corrector.getSuggestions(name);
             if(suggestedWords.size() == 1)
                 name = suggestedWords.get(0);
             else {
@@ -67,11 +67,11 @@ public class NextBusHandler implements Handler {
      */
     private String processDefinedDirection(String name, String direction) {
         boolean onlyTram = direction.contains("(Трамвай)");
-        direction = spellchecker.normalizeWord(direction);
-        if (spellchecker.isWordContainsIncorrectSymbols(direction))
+        direction = normalizeWord(direction);
+        if (corrector.isWordContainsIncorrectSymbols(direction))
             return "*Такого направления нет.*";
         if (busStops.getReferenceByName(direction) == null) {
-            var suggestedWords = spellchecker.getSuggestions(direction);
+            var suggestedWords = corrector.getSuggestions(direction);
             if (suggestedWords.size() == 1)
                 direction = suggestedWords.get(0);
             else
@@ -123,5 +123,20 @@ public class NextBusHandler implements Handler {
         for (var hint : words)
             reply.append(hint).append("\n");
         return reply.toString();
+    }
+
+    /**
+     * Заменяет наиболее часто встречающиеся сокращения на правильные
+     */
+    private String normalizeWord(String word){
+        if (word.contains("площадь"))
+            word = word.replace("площадь", "пл.");
+        if (word.contains("(Трамвай)"))
+            word = word.replace("(Трамвай)", "");
+        if (word.contains("России"))
+            word = word.replace("России", "РФ");
+        if (word.contains("пр."))
+            word = word.replace("пр.", "проспект");
+        return word.trim();
     }
 }

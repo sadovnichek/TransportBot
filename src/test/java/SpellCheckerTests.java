@@ -1,6 +1,6 @@
 import junit.framework.Assert;
 import models.BusStops;
-import models.Spellchecker;
+import models.Corrector;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Before;
@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class SpellCheckerTests {
-    private Spellchecker spellchecker;
+    private Corrector corrector;
     private BusStops busStops;
 
     @Before
@@ -18,7 +18,7 @@ public class SpellCheckerTests {
         File input = new File("src/test/resources/bus_stops.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
         busStops = new BusStops(doc);
-        spellchecker = new Spellchecker(busStops.getAllNames());
+        corrector = new Corrector(busStops.getAllNames());
     }
 
     /**
@@ -27,8 +27,7 @@ public class SpellCheckerTests {
     @Test
     public void spellchecker_ShouldSuggestContinueOfWord() {
         var word = "Ленина";
-        var suggestions = spellchecker.tryGetCompleteName(word);
-        Assert.assertEquals(2, suggestions.size());
+        var suggestions = corrector.getSuggestions(word);
         Assert.assertTrue(suggestions.contains("Проспект Ленина (Карла Либкнехта)"));
         Assert.assertTrue(suggestions.contains("Уральских Рабочих (Ленина)"));
     }
@@ -40,7 +39,7 @@ public class SpellCheckerTests {
     @Test
     public void spellchecker_ShouldSuggestCorrections() {
         var word = "Транзагенство";
-        var suggestions = spellchecker.sortByEditorDistance(word);
+        var suggestions = corrector.getSuggestions(word);
         Assert.assertTrue(suggestions.contains("Трансагентство"));
     }
 
@@ -51,7 +50,7 @@ public class SpellCheckerTests {
     @Test
     public void spellchecker_ShouldEditFirstLetters() {
         var word = "оперный Театр";
-        var suggestions = spellchecker.getSuggestions(word);
+        var suggestions = corrector.getSuggestions(word);
         Assert.assertTrue(suggestions.contains("Оперный театр"));
     }
 }
