@@ -25,11 +25,6 @@ public class TimeTable {
         isTram = this.timeTable.get(this.timeTable.keySet().toArray()[0]).get(0).startsWith("Трамвай");
     }
 
-    public boolean isTram()
-    {
-        return isTram;
-    }
-
     /**
      * Переводит строку со значениями в словарь (время): (номер маршрута)
      * @param source - строка, найденную в getTimeTable.
@@ -60,7 +55,7 @@ public class TimeTable {
      * @param route - "длинная" строка
      * @return список маршрутов
      */
-    public List<String> splitLongString(String route){
+    private List<String> splitLongString(String route){
         int currentPos = 0;
         List<String> result = new ArrayList<>();
         while(currentPos != route.length()) {
@@ -95,10 +90,13 @@ public class TimeTable {
      */
     private String getDataRange(String time) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
-        LocalTime currentTime = LocalTime.parse(time, formatter);
-        var max = currentTime.plusMinutes(2);
-        var min = currentTime.minusMinutes(2);
-        return min.toString() + " - " + max.toString();
+        LocalTime givenTime = LocalTime.parse(time, formatter);
+        LocalTime currentTime = LocalTime.now();
+        var end = givenTime.plusMinutes(2);
+        var start = givenTime.minusMinutes(2);
+        if(start.isBefore(currentTime))
+            start = start.plusMinutes(2);
+        return start + " - " + end;
     }
 
     /**

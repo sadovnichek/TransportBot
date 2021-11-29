@@ -6,15 +6,15 @@ import java.util.Date;
  * Класс пользователя
  */
 public class User {
-    private final long chatId;
+    private final String chatId;
     private long lastQueryTime;
 
-    public User(long chatId) {
+    public User(String chatId) {
         this.chatId = chatId;
         setLastQueryTime();
     }
 
-    public long getChatId() {
+    public String getChatId() {
         return chatId;
     }
 

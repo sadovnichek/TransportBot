@@ -26,7 +26,7 @@ public class NextBusHandlerTests {
     public void setUp() throws IOException {
         File input = new File("src/test/resources/bus_stops.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
-        user = new User(123);
+        user = new User("123");
         handler = new NextBusHandler(doc);
         message = mock(Message.class);
         busStops = new BusStops(doc);
@@ -54,8 +54,7 @@ public class NextBusHandlerTests {
     public void nextBusHandler_ShouldGetTimetable() throws IOException {
         File input = new File("src/test/resources/bazhova.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/bazhova/");
-        var suggestions = busStops.getTimeTable("Музей Бажова", "Трамвайный парк (Чапаева)",
-                false, doc);
+        var suggestions = busStops.getTimeTable("Музей Бажова", "Трамвайный парк (Чапаева)", doc);
         assertEquals(1, suggestions.size());
         var timetable = suggestions.get(0).toString();
         Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n" +

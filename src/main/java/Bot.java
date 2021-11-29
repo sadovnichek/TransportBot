@@ -1,10 +1,17 @@
 import handlers.HelpHandler;
+import handlers.LocateHandler;
 import handlers.NextBusHandler;
 import handlers.StartHandler;
 import models.Handler;
 import models.UpdateReceiver;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import wrappers.MessageResponse;
 import wrappers.Message;
 
@@ -31,7 +38,8 @@ public class Bot extends TelegramLongPollingBot {
         List<Handler> handlers = List.of(
                 new StartHandler(),
                 new NextBusHandler(doc),
-                new HelpHandler()
+                new HelpHandler(),
+                new LocateHandler()
         );
         updateReceiver = new UpdateReceiver(handlers);
     }
@@ -65,8 +73,18 @@ public class Bot extends TelegramLongPollingBot {
      */
     @Override
     public void onUpdateReceived(Update update) {
-        Message wrappedUpdate = new Message(update);
-        List<MessageResponse> responseMessages = updateReceiver.handle(wrappedUpdate);
+        Message message = new Message(update);
+
+        if(update.hasCallbackQuery()){
+            AnswerCallbackQuery answer = new AnswerCallbackQuery();
+            answer.setCallbackQueryId(update.getCallbackQuery().getId());
+            try {
+                execute(answer);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+        List<MessageResponse> responseMessages = updateReceiver.handle(message);
         sendMessages(responseMessages);
     }
 
