@@ -11,26 +11,10 @@ public class Corrector {
     /**
      * Множество названий всех остановок
      */
-    private final Set<String> dictionary;
+    private final List<String> dictionary;
 
-    public Corrector(Set<String> words) {
-        this.dictionary = words;
-    }
-
-    /**
-     * Контроль за тем, что в названии нет недопустимых символов
-     * @return true - слово содержит запрещённые символы, false - в противном случае
-     */
-    public boolean isWordContainsIncorrectSymbols(String word) {
-        var allowedSymbols = List.of('(', ')', ' ', '.', '-');
-        for(int i = 0; i < word.length(); i++) {
-            char currentChar = word.charAt(i);
-            if(!Character.UnicodeBlock.of(currentChar).equals(Character.UnicodeBlock.CYRILLIC)
-                    && !allowedSymbols.contains(currentChar)
-                    && !Character.isDigit(currentChar))
-                return true;
-        }
-        return false;
+    public Corrector(Set<String> dictionary) {
+        this.dictionary = new ArrayList<>(dictionary);
     }
 
     /**
@@ -80,7 +64,7 @@ public class Corrector {
             var distance = countEditorDistance(word, name);
             if(distance == 0)
                 return List.of(name);
-            if(distance < Math.min(word.length(), name.length()))
+            if(distance <= word.length() / 2)
                 distances.put(distance, name);
         }
         var count = min(5, distances.size());
@@ -99,7 +83,8 @@ public class Corrector {
     public List<String> getSuggestions(String word){
         var suggestedWords = tryGetCompleteName(word);
         var correctedWords = sortByEditorDistance(word);
-        suggestedWords.addAll(correctedWords);
+        for(int i = 0; i < correctedWords.size() && suggestedWords.size() < 5; i++)
+            suggestedWords.add(correctedWords.get(i));
         return suggestedWords;
     }
 }

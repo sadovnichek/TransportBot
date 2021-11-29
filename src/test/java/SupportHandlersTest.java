@@ -16,7 +16,7 @@ public class SupportHandlersTest {
 
     @Before
     public void setUp() {
-        user = new User(123);
+        user = new User("123");
         startHandler = new StartHandler();
         helpHandler = new HelpHandler();
         update = mock(Message.class);

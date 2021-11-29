@@ -3,6 +3,7 @@ package handlers;
 import models.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import wrappers.ButtonsMessageResponse;
 import wrappers.MessageResponse;
 import wrappers.SimpleMessageResponse;
 import wrappers.Message;
@@ -20,6 +21,9 @@ public class NextBusHandler implements Handler {
      * Этот класс хранит словарь <название остановки> : <ссылка на неё на сайте bustime.ru>
      */
     private final BusStops busStops;
+    /**
+     * Класс, предлагающий исправления, если такой остановки не нашлось
+     */
     private final Corrector corrector;
 
     public NextBusHandler(Document doc) {
@@ -35,27 +39,49 @@ public class NextBusHandler implements Handler {
         return "/nextbus";
     }
 
+    /**
+     * Является ли строка числом или нет
+     * @param str - строка
+     * @return true - число, false - не число
+     */
+    public boolean isNumber(String str) {
+        if (str == null || str.isEmpty()) return false;
+        for (int i = 0; i < str.length(); i++) {
+            if(str.charAt(i) == '-') continue;
+            else if (!Character.isDigit(str.charAt(i))) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Обрабатывает входящее от пользователя сообщение с командой /nextbus
+     * @param user - пользователь
+     * @param message - сообщение от пользователя
+     * @return список сообщений в ответ пользователю
+     */
     @Override
     public List<MessageResponse> handleMessage(User user, Message message) {
-        String data = message.getMessageData();
+        String userMessage = message.getMessageData();
         var response = new SimpleMessageResponse(user.getChatId());
-        String[] words = data.trim().split("[:]+");
-        String name = normalizeWord(words[0]);
-        if(corrector.isWordContainsIncorrectSymbols(name))
+        String[] tokens = userMessage.trim().split("[:]+");
+        String name = normalizeWord(tokens[0]).trim();
+        if(isNumber(name))
+            name = busStops.getNameByHashcode(Integer.parseInt(name));
+        if(isWordContainsIncorrectSymbols(name))
             return List.of(response.setText("*Такой остановки нет.*"));
         if(busStops.getReferenceByName(name) == null) {
             var suggestedWords = corrector.getSuggestions(name);
             if(suggestedWords.size() == 1)
                 name = suggestedWords.get(0);
             else {
-                var reply = "*Такой остановки нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
-                return List.of(response.setText(reply)); //!
+                var reply = "*Такой остановки нет. Возможно, вы имели в виду:*";
+                return List.of(new ButtonsMessageResponse(user.getChatId(), reply, suggestedWords));
             }
+        } if(tokens.length == 2) // defined direction
+            return List.of((processDefinedDirection(name, tokens[1].trim(), user)));
+        if (tokens.length == 1) { // if not defined direction
+            return List.of(processNonDefinedDirection(name, user));
         }
-        if(words.length == 2) // defined direction
-            return List.of(response.setText(processDefinedDirection(name, words[1])));
-        if (words.length == 1) // if not defined direction
-            return List.of(response.setText(processNonDefinedDirection(name))); //!
         return List.of(response);
     }
 
@@ -65,31 +91,34 @@ public class NextBusHandler implements Handler {
      * @param direction направление - следующая остановка по пути маршрута
      * @return расписание в виде строки
      */
-    private String processDefinedDirection(String name, String direction) {
-        boolean onlyTram = direction.contains("(Трамвай)");
+    private MessageResponse processDefinedDirection(String name, String direction, User user) {
+        if(isNumber(direction))
+            direction = busStops.getNameByHashcode(Integer.parseInt(direction));
         direction = normalizeWord(direction);
-        if (corrector.isWordContainsIncorrectSymbols(direction))
-            return "*Такого направления нет.*";
+        if (isWordContainsIncorrectSymbols(direction))
+            return new SimpleMessageResponse(user.getChatId(), "*Такого направления нет.*");
         if (busStops.getReferenceByName(direction) == null) {
             var suggestedWords = corrector.getSuggestions(direction);
             if (suggestedWords.size() == 1)
                 direction = suggestedWords.get(0);
-            else
-                return "*Такого направления нет. Возможно, вы имели в виду:*\n" + printSuggestions(suggestedWords);
+            else {
+                var reply = "*Такого направления нет. Возможно, вы имели в виду:*";
+                return new ButtonsMessageResponse(user.getChatId(), reply, suggestedWords, name);
+            }
         }
-        StringBuilder reply = new StringBuilder();
         try {
+            StringBuilder reply = new StringBuilder();
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
-            var timetables = busStops.getTimeTable(name, direction, onlyTram, doc);
+            var timetables = busStops.getTimeTable(name, direction, doc);
             if (timetables.size() == 0)
-                return "*Нет транспорта в ближайшее время.*";
+                return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время.*");
             for(TimeTable timetable : timetables){
                 reply.append(timetable).append("\n");
             }
-            return reply.toString();
+            return new SimpleMessageResponse(user.getChatId(), reply.toString());
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return new SimpleMessageResponse(user.getChatId(), "Ошибка при подключении к данным");
         }
     }
 
@@ -98,31 +127,19 @@ public class NextBusHandler implements Handler {
      * @param name имя остановки
      * @return строка с названиями направлений
      */
-    private String processNonDefinedDirection(String name) {
-        StringBuilder reply = new StringBuilder("*" + name + "\n\nУкажите направление из возможных:*\n");
+    private MessageResponse processNonDefinedDirection(String name, User user) {
+        var reply = "*" + name + "\n\nУкажите направление из возможных:*";
         try {
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
-            Set<String> directions = busStops.getDirections(name, doc);
+            var directions = busStops.getDirections(name, doc);
             if (directions.size() == 0)
-                return "*Нет транспорта в ближайшее время.*";
-            for(String route : directions){
-                reply.append(route).append("\n");
-            }
-            return reply.toString();
-        } catch (IOException e) {
+                return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время.*");
+            return new ButtonsMessageResponse(user.getChatId(), reply, directions, name);
+        }
+        catch (IOException e) {
             e.printStackTrace();
-        } return null;
-    }
-
-    /**
-     * Переводит список строк - подсказок в единую строку
-     * @param words список подсказок для пользователя, если он ошибся
-     */
-    private String printSuggestions(List<String> words) {
-        StringBuilder reply = new StringBuilder();
-        for (var hint : words)
-            reply.append(hint).append("\n");
-        return reply.toString();
+        }
+        return new SimpleMessageResponse(user.getChatId(), "Ошибка при подключении к данным");
     }
 
     /**
@@ -137,6 +154,22 @@ public class NextBusHandler implements Handler {
             word = word.replace("России", "РФ");
         if (word.contains("пр."))
             word = word.replace("пр.", "проспект");
-        return word.trim();
+        return word;
+    }
+
+    /**
+     * Контроль за тем, что в названии нет недопустимых символов
+     * @return true - слово содержит запрещённые символы, false - в противном случае
+     */
+    public boolean isWordContainsIncorrectSymbols(String word) {
+        var allowedSymbols = List.of('(', ')', ' ', '.', '-');
+        for(int i = 0; i < word.length(); i++) {
+            char currentChar = word.charAt(i);
+            if(!Character.UnicodeBlock.of(currentChar).equals(Character.UnicodeBlock.CYRILLIC)
+                    && !allowedSymbols.contains(currentChar)
+                    && !Character.isDigit(currentChar))
+                return true;
+        }
+        return false;
     }
 }

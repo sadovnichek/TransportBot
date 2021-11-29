@@ -63,26 +63,34 @@ public class BusStops {
         return busStops.get(name);
     }
 
+    public String getNameByHashcode(long hashcode){
+        for(String name : busStops.keySet()){
+            if(name.hashCode() == hashcode)
+                return name;
+        }
+        return null;
+    }
+
     /**
      * @param name - название остановки
      * @return множество направлений, куда можно попасть из
      * остановки "name"
      */
-    public Set<String> getDirections(String name, Document doc) {
+    public List<String> getDirections(String name, Document doc) {
         Set<String> result = new HashSet<>();
         Elements headLines = doc.getElementsByClass("ui header");
         for (Element headline : headLines) {
             String text = headline.text();
             if(!text.equals("конечная")) {
-                var timeTables = Stream.concat(getTimeTable(name, text, false, doc).stream(),
-                                getTimeTable(name, text, true, doc).stream())
+                var timeTables = Stream.concat(getTimeTable(name, text, doc).stream(),
+                                getTimeTable(name, text, doc).stream())
                         .collect(Collectors.toList());
                 for (TimeTable t : timeTables) {
-                    result.add(text + ((t.isTram()) ? " (Трамвай)" : "") );
+                    result.add(text);
                 }
             }
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     /**
@@ -94,19 +102,20 @@ public class BusStops {
      * @return список расписаний.
      * @see TimeTable
      */
-    public List<TimeTable> getTimeTable(String name, String direction, boolean onlyTram, Document doc){
+    public List<TimeTable> getTimeTable(String name, String direction, Document doc){
         List<TimeTable> result = new ArrayList<>();
         Elements headLines = doc.getElementsByClass("eight wide column").select("div");
         for (Element headline : headLines) {
             String timetableText = headline.text();
             if(timetableText.startsWith("табло " + direction) && timetableText.contains("время")) {
                 timetableText = transformData(timetableText, direction);
-                if (timetableText.equals("")) continue;
-                TimeTable timeTable = new TimeTable(name, direction, timetableText, routes);
-                if(onlyTram && timeTable.isTram())
+                try {
+                    if (timetableText.equals("")) continue;
+                    TimeTable timeTable = new TimeTable(name, direction, timetableText, routes);
                     result.add(timeTable);
-                else
-                    result.add(timeTable);
+                } catch (NullPointerException e) {
+                    continue;
+                }
             }
         } return result;
     }

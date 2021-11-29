@@ -1,15 +1,13 @@
-import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 public class Main {
     public static void main(String[] argv) {
-        ApiContextInitializer.init();
         String token = System.getenv("BOT_TOKEN");
-        TelegramBotsApi botsApi = new TelegramBotsApi();
         try {
+            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(new Bot(token));
-        } catch (TelegramApiException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
