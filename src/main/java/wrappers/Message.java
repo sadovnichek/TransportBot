@@ -11,16 +11,12 @@ public class Message {
     private String messageData;
     private String command;
     private boolean hasCommand;
-    private boolean hasCallbackQuery;
     private Location location;
 
     public boolean hasCommand() {
         return hasCommand;
     }
 
-    /**
-     * Сохраняет сообщение без команды
-     */
     public String getMessageData() {
         return messageData;
     }
@@ -35,7 +31,10 @@ public class Message {
         return location;
     }
 
-    public void recognizeCommand(){
+    /**
+     * Сохраняет команду из сообщения, если она есть
+     */
+    private void recognizeCommand(){
         if(messageData.charAt(0) == '/') {
             hasCommand = true;
             command = messageData.split("[\\s]")[0];
@@ -44,7 +43,7 @@ public class Message {
     }
 
     /**
-     * Обрабатывает сообщение, вычленяет команду для обработки
+     * Сохраняет нужные данные из сообщения
      */
     public Message(Update update) {
         if (update.hasMessage()) {
@@ -59,7 +58,6 @@ public class Message {
         else if (update.hasCallbackQuery()) {
             chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             messageData = update.getCallbackQuery().getData();
-            hasCallbackQuery = true;
             recognizeCommand();
         }
     }

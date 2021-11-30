@@ -11,13 +11,25 @@ import wrappers.SimpleMessageResponse;
 
 import java.util.List;
 
+/**
+ * Класс, активирующий кнопку для передачи GPS пользователя
+ */
 public class LocateHandler implements Handler {
 
+    /**
+     * @return обрабатываемая команда
+     */
     @Override
     public String getHandledCommand() {
         return "/locate";
     }
 
+    /**
+     * Создаёи клавиатуру с кнопкой и прикрепляет её к сообщению
+     * @param user - пользователь
+     * @param message - сообщение от пользователя
+     * @return сообщение
+     */
     @Override
     public List<MessageResponse> handleMessage(User user, Message message) {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();

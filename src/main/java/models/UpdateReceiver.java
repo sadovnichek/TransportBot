@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Принимает обновление от пользователя и обрабатывает его
@@ -45,17 +46,22 @@ public class UpdateReceiver {
         if (!chatIdToUser.containsKey(chatId))
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
-
         if(message.getLocation() != null)
             return List.of(new SimpleMessageResponse(chatId, message.getLocation().toString()));
+
         if(Objects.equals(message.getCommand(), "/users"))
             return List.of(new SimpleMessageResponse(chatId, chatIdToUser.size() + "\nLast start: " +
                     lastTimeUpdateOnServer));
+
         if (message.hasCommand()) {
             if(!message.getMessageData().trim().equals(""))
                 return getHandlerByCommand("/nextbus").handleMessage(user, message);
-            else if(!Objects.equals(message.getCommand(), "/nextbus"))
+            try {
                 return getHandlerByCommand(message.getCommand()).handleMessage(user, message);
+            }
+            catch (UnsupportedOperationException e) {
+                getHandlerByCommand("/help").handleMessage(user, message);
+            }
         }
         return getHandlerByCommand("/help").handleMessage(user, message);
     }

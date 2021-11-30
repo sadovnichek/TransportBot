@@ -9,6 +9,7 @@ import wrappers.SimpleMessageResponse;
 import wrappers.Message;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -44,10 +45,10 @@ public class NextBusHandler implements Handler {
      * @param str - строка
      * @return true - число, false - не число
      */
-    public boolean isNumber(String str) {
+    private boolean isNumber(String str) {
         if (str == null || str.isEmpty()) return false;
         for (int i = 0; i < str.length(); i++) {
-            if(str.charAt(i) == '-') continue;
+            if(str.charAt(0) == '-') continue;
             else if (!Character.isDigit(str.charAt(i))) return false;
         }
         return true;
@@ -62,15 +63,14 @@ public class NextBusHandler implements Handler {
     @Override
     public List<MessageResponse> handleMessage(User user, Message message) {
         String userMessage = message.getMessageData();
-        var response = new SimpleMessageResponse(user.getChatId());
         String[] tokens = userMessage.trim().split("[:]+");
         String name = normalizeWord(tokens[0]).trim();
         if(isNumber(name))
             name = busStops.getNameByHashcode(Integer.parseInt(name));
-        if(isWordContainsIncorrectSymbols(name))
-            return List.of(response.setText("*Такой остановки нет.*"));
+        var suggestedWords = corrector.getSuggestions(name);
+        if(isWordContainsIncorrectSymbols(name) || suggestedWords.size() == 0)
+            return List.of(new SimpleMessageResponse(user.getChatId(), "*Такой остановки нет.*"));
         if(busStops.getReferenceByName(name) == null) {
-            var suggestedWords = corrector.getSuggestions(name);
             if(suggestedWords.size() == 1)
                 name = suggestedWords.get(0);
             else {
@@ -82,7 +82,7 @@ public class NextBusHandler implements Handler {
         if (tokens.length == 1) { // if not defined direction
             return List.of(processNonDefinedDirection(name, user));
         }
-        return List.of(response);
+        return Collections.emptyList();
     }
 
     /**
@@ -95,10 +95,10 @@ public class NextBusHandler implements Handler {
         if(isNumber(direction))
             direction = busStops.getNameByHashcode(Integer.parseInt(direction));
         direction = normalizeWord(direction);
-        if (isWordContainsIncorrectSymbols(direction))
-            return new SimpleMessageResponse(user.getChatId(), "*Такого направления нет.*");
+        var suggestedWords = corrector.getSuggestions(direction);
+        if (isWordContainsIncorrectSymbols(direction) || suggestedWords.size() == 0)
+            return new SimpleMessageResponse(user.getChatId(), "*Такого направления нет*");
         if (busStops.getReferenceByName(direction) == null) {
-            var suggestedWords = corrector.getSuggestions(direction);
             if (suggestedWords.size() == 1)
                 direction = suggestedWords.get(0);
             else {
@@ -116,7 +116,8 @@ public class NextBusHandler implements Handler {
                 reply.append(timetable).append("\n");
             }
             return new SimpleMessageResponse(user.getChatId(), reply.toString());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             return new SimpleMessageResponse(user.getChatId(), "Ошибка при подключении к данным");
         }

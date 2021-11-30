@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
 
@@ -24,7 +25,7 @@ public class Corrector {
      * @param word - название остановки/направления
      * @return список с возможными исправлениями
      */
-    private List<String> tryGetCompleteName(String word) {
+    public List<String> tryGetCompleteName(String word) {
         List<String> result = new ArrayList<>();
         for(String name : dictionary) {
             if (name.contains(word))
@@ -85,6 +86,6 @@ public class Corrector {
         var correctedWords = sortByEditorDistance(word);
         for(int i = 0; i < correctedWords.size() && suggestedWords.size() < 5; i++)
             suggestedWords.add(correctedWords.get(i));
-        return suggestedWords;
+        return suggestedWords.stream().distinct().collect(Collectors.toList());
     }
 }
