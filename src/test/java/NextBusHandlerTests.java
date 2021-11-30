@@ -57,8 +57,7 @@ public class NextBusHandlerTests {
         var suggestions = busStops.getTimeTable("Музей Бажова", "Трамвайный парк (Чапаева)", doc);
         assertEquals(1, suggestions.size());
         var timetable = suggestions.get(0).toString();
-        Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n" +
-                "16:11 - 16:15    Троллейбус-11; \n"));
+        Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n"));
     }
 
     /**
@@ -69,7 +68,7 @@ public class NextBusHandlerTests {
         when(message.getMessageData()).thenReturn("Морской путь");
         var simpleMessageResponse = handler.handleMessage(user, message).get(0);
         var reply = simpleMessageResponse.getMessageText();
-        Assert.assertTrue(reply.contains("Такой остановки нет. Возможно, вы имели в виду:"));
+        assertEquals(reply, "*Такой остановки нет.*");
     }
 
     /**

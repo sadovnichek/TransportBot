@@ -63,6 +63,11 @@ public class BusStops {
         return busStops.get(name);
     }
 
+    /**
+     * Вернуть название остановки по хэш-коду строки
+     * @param hashcode хэш-код строки-названия остановки
+     * @return если нашлось название с таким хэш-кодом - вернет название, иначе - null
+     */
     public String getNameByHashcode(long hashcode){
         for(String name : busStops.keySet()){
             if(name.hashCode() == hashcode)

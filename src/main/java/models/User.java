@@ -6,7 +6,13 @@ import java.util.Date;
  * Класс пользователя
  */
 public class User {
+    /**
+     * id чата с данным пользователем
+     */
     private final String chatId;
+    /**
+     * Время последнего запроса данного пользователя
+     */
     private long lastQueryTime;
 
     public User(String chatId) {
