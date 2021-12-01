@@ -54,12 +54,10 @@ public class UpdateReceiver {
                     lastTimeUpdateOnServer));
 
         if (message.hasCommand()) {
-            if(!message.getMessageData().trim().equals(""))
-                return getHandlerByCommand("/nextbus").handleMessage(user, message);
             try {
                 return getHandlerByCommand(message.getCommand()).handleMessage(user, message);
             }
-            catch (UnsupportedOperationException e) {
+            catch (Exception e) {
                 getHandlerByCommand("/help").handleMessage(user, message);
             }
         }

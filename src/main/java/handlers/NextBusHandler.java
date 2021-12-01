@@ -27,9 +27,9 @@ public class NextBusHandler implements Handler {
      */
     private final Corrector corrector;
 
-    public NextBusHandler(Document doc) {
-        busStops = new BusStops(doc);
-        corrector = new Corrector(busStops.getAllNames());
+    public NextBusHandler(BusStops busStops) {
+        this.busStops = busStops;
+        this.corrector = new Corrector(busStops.getAllNames());
     }
 
     /**
@@ -64,6 +64,8 @@ public class NextBusHandler implements Handler {
     public List<MessageResponse> handleMessage(User user, Message message) {
         String userMessage = message.getMessageData();
         String[] tokens = userMessage.trim().split("[:]+");
+        if(message.getMessageData().equals(""))
+            throw new IllegalArgumentException("command cannot be empty");
         String name = normalizeWord(tokens[0]).trim();
         if(isNumber(name))
             name = busStops.getNameByHashcode(Integer.parseInt(name));
@@ -162,7 +164,7 @@ public class NextBusHandler implements Handler {
      * Контроль за тем, что в названии нет недопустимых символов
      * @return true - слово содержит запрещённые символы, false - в противном случае
      */
-    public boolean isWordContainsIncorrectSymbols(String word) {
+    private boolean isWordContainsIncorrectSymbols(String word) {
         var allowedSymbols = List.of('(', ')', ' ', '.', '-');
         for(int i = 0; i < word.length(); i++) {
             char currentChar = word.charAt(i);

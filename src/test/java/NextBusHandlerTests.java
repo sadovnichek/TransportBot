@@ -27,9 +27,9 @@ public class NextBusHandlerTests {
         File input = new File("src/test/resources/bus_stops.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
         user = new User("123");
-        handler = new NextBusHandler(doc);
         message = mock(Message.class);
         busStops = new BusStops(doc);
+        handler = new NextBusHandler(busStops);
     }
 
     /**
