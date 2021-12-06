@@ -33,8 +33,8 @@ public class BusStops {
         }
         File file = new File("src/main/resources/bus_routes.txt");
         try {
-            FileReader fr = new FileReader(file);
-            BufferedReader reader = new BufferedReader(fr);
+            FileReader fileReader = new FileReader(file);
+            BufferedReader reader = new BufferedReader(fileReader);
             String line = reader.readLine();
             while (line != null) {
                 var busRoutes = line.split("[\\s]+");
@@ -59,7 +59,6 @@ public class BusStops {
      * или null, если такой остановки нет
      */
     public String getReferenceByName(String name) {
-        if (!busStops.containsKey(name)) return null;
         return busStops.get(name);
     }
 

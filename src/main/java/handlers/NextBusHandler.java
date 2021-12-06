@@ -64,6 +64,8 @@ public class NextBusHandler implements Handler {
     public List<MessageResponse> handleMessage(User user, Message message) {
         String userMessage = message.getMessageData();
         String[] tokens = userMessage.trim().split("[:]+");
+        if(tokens.length == 0)
+            throw new IllegalArgumentException("command args cannot be empty");
         String name = normalizeWord(tokens[0]).trim();
         if(isNumber(name))
             name = busStops.getNameByHashcode(Integer.parseInt(name));
@@ -77,7 +79,8 @@ public class NextBusHandler implements Handler {
                 var reply = "*Такой остановки нет. Возможно, вы имели в виду:*";
                 return List.of(new ButtonsMessageResponse(user.getChatId(), reply, suggestedWords));
             }
-        } if(tokens.length == 2) // defined direction
+        }
+        if(tokens.length == 2) // defined direction
             return List.of((processDefinedDirection(name, tokens[1].trim(), user)));
         if (tokens.length == 1) { // if not defined direction
             return List.of(processNonDefinedDirection(name, user));
@@ -162,7 +165,7 @@ public class NextBusHandler implements Handler {
      * Контроль за тем, что в названии нет недопустимых символов
      * @return true - слово содержит запрещённые символы, false - в противном случае
      */
-    public boolean isWordContainsIncorrectSymbols(String word) {
+    private boolean isWordContainsIncorrectSymbols(String word) {
         var allowedSymbols = List.of('(', ')', ' ', '.', '-');
         for(int i = 0; i < word.length(); i++) {
             char currentChar = word.charAt(i);

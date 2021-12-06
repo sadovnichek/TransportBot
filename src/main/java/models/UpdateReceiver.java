@@ -1,5 +1,6 @@
 package models;
 
+import handlers.LocateHandler;
 import wrappers.MessageResponse;
 import wrappers.Message;
 import wrappers.SimpleMessageResponse;
@@ -46,20 +47,23 @@ public class UpdateReceiver {
         if (!chatIdToUser.containsKey(chatId))
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
-        if(message.getLocation() != null)
-            return List.of(new SimpleMessageResponse(chatId, message.getLocation().toString()));
 
+        if(message.getLocation() != null) {
+            LocateHandler locateHandler = (LocateHandler) getHandlerByCommand("/locate");
+            var nearest = locateHandler.getNearestBusStop(message.getLocation());
+            return List.of(new SimpleMessageResponse(chatId,
+                    nearest.getName() + ": " + nearest.getDirection() + " "
+                            + message.getLocation().distanceTo(nearest.getLocation()) + "meters"));
+        }
         if(Objects.equals(message.getCommand(), "/users"))
             return List.of(new SimpleMessageResponse(chatId, chatIdToUser.size() + "\nLast start: " +
                     lastTimeUpdateOnServer));
 
         if (message.hasCommand()) {
-            if(!message.getMessageData().trim().equals(""))
-                return getHandlerByCommand("/nextbus").handleMessage(user, message);
             try {
                 return getHandlerByCommand(message.getCommand()).handleMessage(user, message);
             }
-            catch (UnsupportedOperationException e) {
+            catch (Exception e) {
                 getHandlerByCommand("/help").handleMessage(user, message);
             }
         }
