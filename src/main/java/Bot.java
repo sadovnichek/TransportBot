@@ -2,17 +2,12 @@ import handlers.HelpHandler;
 import handlers.LocateHandler;
 import handlers.NextBusHandler;
 import handlers.StartHandler;
-import models.BusStops;
+import models.BusStopsRepository;
 import models.Handler;
 import models.UpdateReceiver;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import wrappers.MessageResponse;
 import wrappers.Message;
 
@@ -35,20 +30,21 @@ public class Bot extends TelegramLongPollingBot {
      */
     public Bot(String token) {
         this.token = token;
-        Document doc = readDocument("https://www.bustime.ru/ekaterinburg/stop/");
-        BusStops busStops = new BusStops(doc);
+        Document doc = readDocument();
+        assert doc != null;
+        BusStopsRepository busStops = new BusStopsRepository(doc);
         List<Handler> handlers = List.of(
                 new StartHandler(),
                 new NextBusHandler(busStops),
                 new HelpHandler(),
                 new LocateHandler()
         );
-        this.updateReceiver = new UpdateReceiver(handlers);
+        updateReceiver = new UpdateReceiver(handlers, busStops);
     }
 
-    private Document readDocument(String url) {
+    private Document readDocument() {
         try {
-            return Jsoup.connect(url).get();
+            return Jsoup.connect("https://www.bustime.ru/ekaterinburg/stop/").get();
         } catch (IOException e) {
             e.printStackTrace();
         }

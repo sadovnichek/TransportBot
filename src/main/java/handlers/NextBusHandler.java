@@ -9,9 +9,9 @@ import wrappers.SimpleMessageResponse;
 import wrappers.Message;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Класс, обрабатывающий команду /nextbus.
@@ -21,13 +21,13 @@ public class NextBusHandler implements Handler {
      * Поле типа BusStops.
      * Этот класс хранит словарь <название остановки> : <ссылка на неё на сайте bustime.ru>
      */
-    private final BusStops busStops;
+    private final BusStopsRepository busStops;
     /**
      * Класс, предлагающий исправления, если такой остановки не нашлось
      */
     private final Corrector corrector;
 
-    public NextBusHandler(BusStops busStops) {
+    public NextBusHandler(BusStopsRepository busStops) {
         this.busStops = busStops;
         this.corrector = new Corrector(busStops.getAllNames());
     }
@@ -63,9 +63,11 @@ public class NextBusHandler implements Handler {
     @Override
     public List<MessageResponse> handleMessage(User user, Message message) {
         String userMessage = message.getMessageData();
+        if(message.getLocation() != null)
+            return processLocation(user, message);
         String[] tokens = userMessage.trim().split("[:]+");
-        if(message.getMessageData().equals(""))
-            throw new IllegalArgumentException("command cannot be empty");
+        if(tokens.length == 0)
+            throw new IllegalArgumentException("command args cannot be empty");
         String name = normalizeWord(tokens[0]).trim();
         if(isNumber(name))
             name = busStops.getNameByHashcode(Integer.parseInt(name));
@@ -79,8 +81,9 @@ public class NextBusHandler implements Handler {
                 var reply = "*Такой остановки нет. Возможно, вы имели в виду:*";
                 return List.of(new ButtonsMessageResponse(user.getChatId(), reply, suggestedWords));
             }
-        } if(tokens.length == 2) // defined direction
-            return List.of((processDefinedDirection(name, tokens[1].trim(), user)));
+        }
+        if(tokens.length == 2) // defined direction
+            return List.of(processDefinedDirection(name, tokens[1].trim(), user));
         if (tokens.length == 1) { // if not defined direction
             return List.of(processNonDefinedDirection(name, user));
         }
@@ -108,21 +111,20 @@ public class NextBusHandler implements Handler {
                 return new ButtonsMessageResponse(user.getChatId(), reply, suggestedWords, name);
             }
         }
+        StringBuilder reply = new StringBuilder();
         try {
-            StringBuilder reply = new StringBuilder();
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
-            var timetables = busStops.getTimeTable(name, direction, doc);
+            var timetables = busStops.getTimetable(name, direction, doc);
             if (timetables.size() == 0)
                 return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время.*");
-            for(TimeTable timetable : timetables){
+            for(Timetable timetable : timetables){
                 reply.append(timetable).append("\n");
             }
             return new SimpleMessageResponse(user.getChatId(), reply.toString());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            return new SimpleMessageResponse(user.getChatId(), "Ошибка при подключении к данным");
         }
+        return new SimpleMessageResponse(user.getChatId(), "*Ошибка при подключении к серверу*");
     }
 
     /**
@@ -131,18 +133,41 @@ public class NextBusHandler implements Handler {
      * @return строка с названиями направлений
      */
     private MessageResponse processNonDefinedDirection(String name, User user) {
-        var reply = "*" + name + "\n\nУкажите направление из возможных:*";
         try {
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
+            var reply = "*" + name + "\n\nУкажите направление из возможных:*";
             var directions = busStops.getDirections(name, doc);
             if (directions.size() == 0)
                 return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время.*");
             return new ButtonsMessageResponse(user.getChatId(), reply, directions, name);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return new SimpleMessageResponse(user.getChatId(), "Ошибка при подключении к данным");
+        return new SimpleMessageResponse(user.getChatId(), "*Ошибка при подключении к серверу*");
+    }
+
+    /**
+     * Обрабатывает локацию в сообщении
+     * @param user пользователь, отправивший команду
+     * @param message сообщение от пользователя
+     * @return список сообщений - ответов от бота
+     */
+    private List<MessageResponse> processLocation(User user, Message message) {
+        List<BusStop> candidates = busStops.getNearestBusStop(message.getLocation());
+        if(candidates.size() == 0)
+            return List.of(new SimpleMessageResponse(user.getChatId(), "*Вы не находитесь на остановке*"));
+        BusStop mostPossible = candidates.get(0);
+        candidates.remove(mostPossible);
+        var timetableMessage = processDefinedDirection(mostPossible.getName(),
+                mostPossible.getDirection(), user);
+        String messageText = "*Если остановка определена неверно, выберите одну из предложенных:*";
+        List<String> buttonsText = new ArrayList<>();
+        for(BusStop candidate : candidates) {
+            buttonsText.add(candidate.getDirection());
+        }
+        var candidatesMessage = new ButtonsMessageResponse(user.getChatId(), messageText,
+                buttonsText, mostPossible.getName());
+        return List.of(timetableMessage, candidatesMessage);
     }
 
     /**

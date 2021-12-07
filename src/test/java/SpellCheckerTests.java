@@ -1,5 +1,5 @@
 import junit.framework.Assert;
-import models.BusStops;
+import models.BusStopsRepository;
 import models.Corrector;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,13 +11,13 @@ import java.io.IOException;
 
 public class SpellCheckerTests {
     private Corrector corrector;
-    private BusStops busStops;
+    private BusStopsRepository busStops;
 
     @Before
     public void setUp() throws IOException {
         File input = new File("src/test/resources/bus_stops.html");
         Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
-        busStops = new BusStops(doc);
+        busStops = new BusStopsRepository(doc);
         corrector = new Corrector(busStops.getAllNames());
     }
 

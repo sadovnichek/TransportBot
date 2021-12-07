@@ -1,6 +1,6 @@
 package wrappers;
 
-import org.telegram.telegrambots.meta.api.objects.Location;
+import models.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 /**
@@ -53,7 +53,8 @@ public class Message {
                 recognizeCommand();
             }
             if(update.getMessage().hasLocation())
-                location = update.getMessage().getLocation();
+                location = new Location(update.getMessage().getLocation().getLatitude(),
+                        update.getMessage().getLocation().getLongitude());
         }
         else if (update.hasCallbackQuery()) {
             chatId = update.getCallbackQuery().getMessage().getChatId().toString();
