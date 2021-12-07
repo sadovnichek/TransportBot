@@ -1,9 +1,18 @@
 package models;
 
+/**
+ * Местоположение объекта на Земле
+ */
 public class Location {
 
     private static final double RADIUS = 6371.283;
+    /**
+     * Географическая широта
+     */
     private final double latitude;
+    /**
+     * Географическая долгота
+     */
     private final double longitude;
 
     public Location(String latitude, String longitude) {
@@ -24,6 +33,11 @@ public class Location {
         return this.longitude;
     }
 
+    /**
+     * Вычисление расстояния между двумя точками на поверхности Земли
+     * @param other объект, до которого хотим вычислить расстояние
+     * @return расстояние в метрах
+     */
     public double distanceTo(Location other) {
         double aRadLat = Math.toRadians(this.getLatitude());
         double aRadLong = Math.toRadians(this.getLongitude());

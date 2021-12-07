@@ -2,7 +2,7 @@ import handlers.HelpHandler;
 import handlers.LocateHandler;
 import handlers.NextBusHandler;
 import handlers.StartHandler;
-import models.BusStops;
+import models.BusStopsRepository;
 import models.Handler;
 import models.UpdateReceiver;
 import org.jsoup.Jsoup;
@@ -32,14 +32,14 @@ public class Bot extends TelegramLongPollingBot {
         this.token = token;
         Document doc = readDocument();
         assert doc != null;
-        BusStops busStops = new BusStops(doc);
+        BusStopsRepository busStops = new BusStopsRepository(doc);
         List<Handler> handlers = List.of(
                 new StartHandler(),
-                new NextBusHandler(doc),
+                new NextBusHandler(busStops),
                 new HelpHandler(),
                 new LocateHandler()
         );
-        updateReceiver = new UpdateReceiver(handlers);
+        updateReceiver = new UpdateReceiver(handlers, busStops);
     }
 
     private Document readDocument() {

@@ -1,5 +1,8 @@
 package models;
 
+/**
+ * Класс, описывающий остановку транспорта
+ */
 public class BusStop {
 
     private String name;

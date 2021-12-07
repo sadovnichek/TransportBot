@@ -1,16 +1,13 @@
 package models;
 
-import handlers.LocateHandler;
 import wrappers.MessageResponse;
 import wrappers.Message;
 import wrappers.SimpleMessageResponse;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Принимает обновление от пользователя и обрабатывает его
@@ -28,11 +25,13 @@ public class UpdateReceiver {
      * Время последнего запуска на сервере
      */
     private final Date lastTimeUpdateOnServer;
+    private final BusStopsRepository busStops;
 
-    public UpdateReceiver(List<Handler> handlers) {
+    public UpdateReceiver(List<Handler> handlers, BusStopsRepository busStops) {
         this.handlers = handlers;
-        chatIdToUser = new ConcurrentHashMap<>();
-        lastTimeUpdateOnServer = new Date();
+        this.chatIdToUser = new ConcurrentHashMap<>();
+        this.lastTimeUpdateOnServer = new Date();
+        this.busStops = busStops;
     }
 
     /**
@@ -48,13 +47,8 @@ public class UpdateReceiver {
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
 
-        if(message.getLocation() != null) {
-            LocateHandler locateHandler = (LocateHandler) getHandlerByCommand("/locate");
-            var nearest = locateHandler.getNearestBusStop(message.getLocation());
-            return List.of(new SimpleMessageResponse(chatId,
-                    nearest.getName() + ": " + nearest.getDirection() + " "
-                            + message.getLocation().distanceTo(nearest.getLocation()) + "meters"));
-        }
+        if(message.getLocation() != null)
+            return getHandlerByCommand("/nextbus").handleMessage(user, message);
         if(Objects.equals(message.getCommand(), "/users"))
             return List.of(new SimpleMessageResponse(chatId, chatIdToUser.size() + "\nLast start: " +
                     lastTimeUpdateOnServer));

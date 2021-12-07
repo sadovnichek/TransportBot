@@ -8,22 +8,20 @@ import java.util.*;
 /**
  * Класс расписания по отношению к конкретной остановке
  */
-public class TimeTable {
+public class Timetable {
     /**
      * Здесь хранится (время): (список транспорта, прибывающего в это время)
      */
     private final Map<String, List<String>> timeTable;
     private final String busStopName;
     private final String direction;
-    private final boolean isTram;
     private final Set<String> routes;
 
-    public TimeTable(String name, String direction, String timetable, Set<String> routes) {
+    public Timetable(String name, String direction, String timetable, Set<String> routes) {
         this.busStopName = name;
         this.timeTable = makeTimeTableFromString(timetable);
         this.direction = direction;
         this.routes = routes;
-        isTram = this.timeTable.get(this.timeTable.keySet().toArray()[0]).get(0).startsWith("Трамвай");
     }
 
     /**
@@ -105,8 +103,7 @@ public class TimeTable {
      */
     @Override
     public String toString() {
-        String headline = "*" + busStopName + "-->" + direction;
-        headline += (isTram) ? " (Трамвай)*\n" : "*\n";
+        String headline = "*" + busStopName + "-->" + direction + "*\n";
         var result = new StringBuilder(headline);
         for (var time : timeTable.keySet()) {
             String timeRange = getDataRange(time);
@@ -114,7 +111,7 @@ public class TimeTable {
             int size = timeTable.get(time).size();
             for(int i = 0; i < size; i++) {
                 String route = timeTable.get(time).get(i);
-                if(route.length() > 3 && !route.contains("Троллейбус") && !isTram) {
+                if(route.length() > 3 && !route.contains("Троллейбус")) {
                     var routesList = splitLongString(route);
                     for (String s : routesList)
                         result.append(s).append("; ");
