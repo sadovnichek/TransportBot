@@ -39,7 +39,6 @@ public class LocateHandler implements Handler {
         row.add(button);
         keyboardMarkup.setKeyboard(List.of(row));
         keyboardMarkup.setResizeKeyboard(true);
-
         return List.of(new SimpleMessageResponse(user.getChatId(),
                 "Доступно определение по GPS", keyboardMarkup));
     }

@@ -11,6 +11,7 @@ import wrappers.Message;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -62,18 +63,24 @@ public class NextBusHandler implements Handler {
      */
     @Override
     public List<MessageResponse> handleMessage(User user, Message message) {
+        long currentTime = new Date().getTime();
+        if (currentTime - user.getLastQueryTime() <= 10 * 1000 && user.IsLastMessageSameTypeAsNew(message))
+            return List.of(new SimpleMessageResponse(user.getChatId(),
+                    "*Пожалуйста, соблюдайте интервал в 10 секунд между сообщениями. " +
+                            "Это поможет снизить нагрузку на сервер*"));
         String userMessage = message.getMessageData();
+        user.setLastQueryTime();
+        user.setLastMessage(message);
         if(message.getLocation() != null)
             return processLocation(user, message);
         String[] tokens = userMessage.trim().split("[:]+");
         if(tokens.length == 0)
             throw new IllegalArgumentException("command args cannot be empty");
-        String name = normalizeWord(tokens[0]).trim();
-        if(isNumber(name))
-            name = busStops.getNameByHashcode(Integer.parseInt(name));
+        String name = (isNumber(tokens[0])) ? busStops.getNameByHashcode(Integer.parseInt(tokens[0]))
+                                            : normalizeWord(tokens[0]).trim();
         var suggestedWords = corrector.getSuggestions(name);
         if(isWordContainsIncorrectSymbols(name) || suggestedWords.size() == 0)
-            return List.of(new SimpleMessageResponse(user.getChatId(), "*Такой остановки нет.*"));
+            return List.of(new SimpleMessageResponse(user.getChatId(), "*Такой остановки нет*"));
         if(busStops.getReferenceByName(name) == null) {
             if(suggestedWords.size() == 1)
                 name = suggestedWords.get(0);
@@ -116,7 +123,8 @@ public class NextBusHandler implements Handler {
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
             var timetables = busStops.getTimetable(name, direction, doc);
             if (timetables.size() == 0)
-                return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время.*");
+                return new SimpleMessageResponse(user.getChatId(),
+                        "*" + name + ": Нет транспорта в ближайшее время*");
             for(Timetable timetable : timetables){
                 reply.append(timetable).append("\n");
             }
@@ -138,7 +146,7 @@ public class NextBusHandler implements Handler {
             var reply = "*" + name + "\n\nУкажите направление из возможных:*";
             var directions = busStops.getDirections(name, doc);
             if (directions.size() == 0)
-                return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время.*");
+                return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время*");
             return new ButtonsMessageResponse(user.getChatId(), reply, directions, name);
         } catch (IOException e) {
             e.printStackTrace();

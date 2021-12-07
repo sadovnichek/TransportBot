@@ -23,18 +23,6 @@ public class SupportHandlersTest {
     }
 
     /**
-     * Проверяет, что принятое сообщение меняет время последнего запроса
-     * Это нужно для контроля активности - нельзя отправлять боту сообщение
-     * чаще, чем 1 раз в 10 с.
-     */
-    @Test
-    public void startHandler_ShouldChangeUserLastQueryTime() {
-        long preQueryTime = user.getLastQueryTime();
-        startHandler.handleMessage(user, update);
-        assertNotSame(preQueryTime, user.getLastQueryTime());
-    }
-
-    /**
      * Проверяет, что ответ существует, и кол-во сообщений от бота равно 1
      */
     @Test
@@ -53,18 +41,6 @@ public class SupportHandlersTest {
         var expected = "*Привет! Я - Transport Bot\n" +
                 "Помощь тут - /help*";
         assertSame(expected, actual);
-    }
-
-    /**
-     * Проверяет, что принятое сообщение меняет время последнего запроса
-     * Это нужно для контроля активности - нельзя отправлять боту сообщение
-     * чаще, чем 1 раз в 10 с.
-     */
-    @Test
-    public void helpHandler_ShouldChangeUserLastQueryTime() {
-        long preQueryTime = user.getLastQueryTime();
-        helpHandler.handleMessage(user, update);
-        assertNotSame(preQueryTime, user.getLastQueryTime());
     }
 
     /**

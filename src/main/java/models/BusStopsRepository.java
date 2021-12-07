@@ -78,7 +78,7 @@ public class BusStopsRepository {
      * @return список направлений
      */
     public List<String> getDirections(String name, Document doc) {
-        List<String> result = new ArrayList<>();
+        Set<String> result = new HashSet<>();
         Elements headLines = doc.getElementsByClass("ui header");
         for (Element headline : headLines) {
             String text = headline.text();
@@ -86,7 +86,7 @@ public class BusStopsRepository {
                 result.add(text);
             }
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     /**

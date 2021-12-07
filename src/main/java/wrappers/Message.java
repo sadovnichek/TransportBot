@@ -11,11 +11,14 @@ public class Message {
     private String messageData;
     private String command;
     private boolean hasCommand;
+    private boolean hasCallbackQuery;
     private Location location;
 
     public boolean hasCommand() {
         return hasCommand;
     }
+
+    public boolean hasCallbackQuery() { return hasCallbackQuery; }
 
     public String getMessageData() {
         return messageData;
@@ -59,6 +62,7 @@ public class Message {
         else if (update.hasCallbackQuery()) {
             chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             messageData = update.getCallbackQuery().getData();
+            hasCallbackQuery = true;
             recognizeCommand();
         }
     }

@@ -46,18 +46,17 @@ public class UpdateReceiver {
         if (!chatIdToUser.containsKey(chatId))
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
-
         if(message.getLocation() != null)
             return getHandlerByCommand("/nextbus").handleMessage(user, message);
         if(Objects.equals(message.getCommand(), "/users"))
             return List.of(new SimpleMessageResponse(chatId, chatIdToUser.size() + "\nLast start: " +
                     lastTimeUpdateOnServer));
-
         if (message.hasCommand()) {
             try {
                 return getHandlerByCommand(message.getCommand()).handleMessage(user, message);
             }
             catch (Exception e) {
+                e.printStackTrace();
                 getHandlerByCommand("/help").handleMessage(user, message);
             }
         }

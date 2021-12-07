@@ -24,11 +24,19 @@ public class LocationTests {
 
     /**
      * Возвращает пустой список, если пользователь не на остановке
+     * 56.827814, 60.616859
      */
     @Test
     public void shouldRecognizeBusStopIfUserDoNotNearWithIt() {
         Location location = new Location(56.830879, 60.621304);
         List<BusStop> nearest = busStops.getNearestBusStop(location);
         Assert.assertEquals(0, nearest.size());
+    }
+
+    @Test
+    public void shouldRecognizeBusStop() {
+        Location location = new Location(56.827814, 60.616859);
+        BusStop nearest = busStops.getNearestBusStop(location).get(0);
+        Assert.assertEquals("Куйбышева (Белинского)", nearest.getName());
     }
 }

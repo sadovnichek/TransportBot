@@ -37,7 +37,6 @@ public class HelpHandler implements Handler {
                 "Направление - следующая остановка по маршруту. " +
                 "Если вы затрудняетесь указать направление, то не указывайте его. " +
                 "Бот попробует вам его подсказать\n";
-
         SimpleMessageResponse startMessage = new SimpleMessageResponse(user.getChatId(), startText);
         return List.of(startMessage);
     }
