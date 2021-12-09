@@ -1,5 +1,6 @@
 package models;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -31,7 +32,7 @@ public class BusStopsRepository {
     public BusStopsRepository() {
         List<String> lines = Reader.readLines("src/main/resources/references.txt");
         for(String line : lines) {
-            String[] args = line.split(":");
+            String[] args = line.split(",");
             String name = args[0].trim();
             String reference = args[1].trim();
             busStopReferences.put(name, reference);
