@@ -161,7 +161,7 @@ public class NextBusHandler implements Handler {
      * @return список сообщений - ответов от бота
      */
     private List<MessageResponse> processLocation(User user, Message message) {
-        List<BusStop> candidates = busStops.getNearestBusStop(new Location(56.818519, 60.612859));
+        List<BusStop> candidates = busStops.getNearestBusStop(message.getLocation());
         if(candidates.size() == 0)
             return List.of(new SimpleMessageResponse(user.getChatId(), "*Вы не находитесь на остановке*"));
         BusStop mostPossible = candidates.get(0);
