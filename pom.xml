@@ -59,6 +59,7 @@
                 <version>3.0.0-M1</version>
                 <configuration>
                     <skipTests>false</skipTests>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
                 </configuration>
             </plugin>
         </plugins>

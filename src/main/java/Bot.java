@@ -29,10 +29,7 @@ public class Bot extends TelegramLongPollingBot {
      * В конструкторе регистрируются обработчики команд
      */
     public Bot(String token) {
-        this.token = token;
-        Document doc = readDocument();
-        assert doc != null;
-        BusStopsRepository busStops = new BusStopsRepository(doc);
+        this.token = token;BusStopsRepository busStops = new BusStopsRepository();
         List<Handler> handlers = List.of(
                 new StartHandler(),
                 new NextBusHandler(busStops),
@@ -40,15 +37,6 @@ public class Bot extends TelegramLongPollingBot {
                 new LocateHandler()
         );
         updateReceiver = new UpdateReceiver(handlers, busStops);
-    }
-
-    private Document readDocument() {
-        try {
-            return Jsoup.connect("https://www.bustime.ru/ekaterinburg/stop/").get();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**

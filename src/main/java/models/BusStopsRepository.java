@@ -5,6 +5,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import util.Reader;
 
+import java.io.IOException;
+import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,14 +28,16 @@ public class BusStopsRepository {
      */
     private final Set<String> routes;
 
-    public BusStopsRepository(Document doc) {
-        Elements headLines = doc.getElementsByClass("ui fluid vertical menu")
-                .select("a.item");
-        for (Element headline : headLines) {
-            busStopReferences.put(headline.text(), headline.attr("href"));
+    public BusStopsRepository() {
+        List<String> lines = Reader.readLines("src/main/resources/references.txt");
+        for(String line : lines) {
+            String[] args = line.split(":");
+            String name = args[0].trim();
+            String reference = args[1].trim();
+            busStopReferences.put(name, reference);
         }
         this.routes = new HashSet<>(Reader.readLines("src/main/resources/bus_routes.txt"));
-        List<String> lines = Reader.readLines("src/main/resources/coordinates.txt");
+        lines = Reader.readLines("src/main/resources/coordinates.txt");
         for(String line : lines) {
             String[] args = line.split(",");
             String name = args[0].trim();
@@ -123,7 +127,7 @@ public class BusStopsRepository {
         for(BusStop busStop : busStops) {
             Location busStopLocation = busStop.getLocation();
             double distance = userLocation.distanceTo(busStopLocation);
-            if (distance <= 40)
+            if (distance <= 70)
                 nearestStops.put(distance, busStop);
         }
         return nearestStops.values().stream().limit(3).collect(Collectors.toList());

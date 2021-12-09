@@ -1,7 +1,6 @@
 import handlers.NextBusHandler;
 import junit.framework.Assert;
 import models.BusStopsRepository;
-import models.Location;
 import models.User;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,12 +22,10 @@ public class NextBusHandlerTests {
     private BusStopsRepository busStops;
 
     @Before
-    public void setUp() throws IOException {
-        File input = new File("src/test/resources/bus_stops.html");
-        Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/");
+    public void setUp() {
         user = new User("123");
         message = mock(Message.class);
-        busStops = new BusStopsRepository(doc);
+        busStops = new BusStopsRepository();
         handler = new NextBusHandler(busStops);
     }
 
@@ -39,7 +36,7 @@ public class NextBusHandlerTests {
     @Test
     public void nextBusHandler_ShouldSuggestDirections() throws IOException {
         File input = new File("src/test/resources/bazhova.html");
-        Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/bazhova/");
+        Document doc = Jsoup.parse(input, "UTF-8");
         var suggestions = busStops.getDirections("Музей Бажова", doc);
         assertEquals(3, suggestions.size());
         Assert.assertTrue(suggestions.contains("Трамвайный парк (Чапаева)"));
@@ -53,7 +50,7 @@ public class NextBusHandlerTests {
     @Test
     public void nextBusHandler_ShouldGetTimetable() throws IOException {
         File input = new File("src/test/resources/bazhova.html");
-        Document doc = Jsoup.parse(input, "UTF-8", "https://www.bustime.ru/ekaterinburg/stop/bazhova/");
+        Document doc = Jsoup.parse(input, "UTF-8");
         var suggestions = busStops.getTimetable("Музей Бажова", "Трамвайный парк (Чапаева)", doc);
         assertEquals(1, suggestions.size());
         var timetable = suggestions.get(0).toString();
@@ -68,7 +65,7 @@ public class NextBusHandlerTests {
         when(message.getMessageData()).thenReturn("Морской путь");
         var simpleMessageResponse = handler.handleMessage(user, message).get(0);
         var reply = simpleMessageResponse.getMessageText();
-        assertEquals(reply, "*Такой остановки нет.*");
+        assertEquals(reply, "*Такой остановки нет*");
     }
 
     /**
@@ -93,16 +90,6 @@ public class NextBusHandlerTests {
         when(message.getMessageData()).thenReturn("/nextbus @#$%^&");
         var simpleMessageResponse = handler.handleMessage(user, message).get(0);
         var reply = simpleMessageResponse.getMessageText();
-        assertEquals("*Такой остановки нет.*", reply);
-    }
-
-    /**
-     * Определяет, что в радиусе 40 метров от пользователя нет остановок
-     */
-    @Test
-    public void nextBusHandler_LocationNotNearBusStop() {
-        when(message.getLocation()).thenReturn(new Location(56.826327, 60.619963));
-        var response = handler.handleMessage(user, message).get(0);
-        assertTrue(response.getMessageText().contains("Вы не находитесь на остановке"));
+        assertEquals("*Такой остановки нет*", reply);
     }
 }

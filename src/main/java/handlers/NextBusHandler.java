@@ -124,7 +124,7 @@ public class NextBusHandler implements Handler {
             var timetables = busStops.getTimetable(name, direction, doc);
             if (timetables.size() == 0)
                 return new SimpleMessageResponse(user.getChatId(),
-                        "*" + name + ": Нет транспорта в ближайшее время*");
+                        "*" + name + ": " + direction + "\nНет транспорта в ближайшее время*");
             for(Timetable timetable : timetables){
                 reply.append(timetable).append("\n");
             }
@@ -161,15 +161,17 @@ public class NextBusHandler implements Handler {
      * @return список сообщений - ответов от бота
      */
     private List<MessageResponse> processLocation(User user, Message message) {
-        List<BusStop> candidates = busStops.getNearestBusStop(message.getLocation());
+        List<BusStop> candidates = busStops.getNearestBusStop(new Location(56.818519, 60.612859));
         if(candidates.size() == 0)
             return List.of(new SimpleMessageResponse(user.getChatId(), "*Вы не находитесь на остановке*"));
         BusStop mostPossible = candidates.get(0);
-        candidates.remove(mostPossible);
         var timetableMessage = processDefinedDirection(mostPossible.getName(),
                 mostPossible.getDirection(), user);
+        if(candidates.size() == 1)
+            return List.of(timetableMessage);
         String messageText = "*Если остановка определена неверно, выберите одну из предложенных:*";
         List<String> buttonsText = new ArrayList<>();
+        candidates.remove(mostPossible);
         for(BusStop candidate : candidates) {
             buttonsText.add(candidate.getDirection());
         }
