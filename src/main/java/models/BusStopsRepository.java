@@ -106,6 +106,7 @@ public class BusStopsRepository {
                 timetableText = transformText(timetableText, direction);
                 try {
                     Timetable timeTable = new Timetable(name, direction, timetableText, routes);
+                    System.out.println(timeTable.toString());
                     result.add(timeTable);
                 } catch (NullPointerException e) {
                     continue;

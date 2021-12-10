@@ -31,18 +31,15 @@ public class Timetable {
      */
     private Map<String, List<String>> makeTimeTableFromString(String source) {
         Map<String, List<String>> timeTable = new LinkedHashMap<>();
-        List<String> routes = new ArrayList<>();
         var tokens = source.split("\\s+");
         String currentTime = "";
         for (var token : tokens) {
             if(token.contains(":")) {
-                timeTable.put(token, routes);
+                timeTable.put(token, new ArrayList<>());
                 currentTime = token;
-                routes = new ArrayList<>();
             }
-            else {
+            else
                 timeTable.get(currentTime).add(token);
-            }
         }
         return timeTable;
     }
@@ -111,7 +108,7 @@ public class Timetable {
             int size = timeTable.get(time).size();
             for(int i = 0; i < size; i++) {
                 String route = timeTable.get(time).get(i);
-                if(route.length() > 3 && !route.contains("Троллейбус")) {
+                if(route.length() > 3 && !route.contains("Троллейбус") && !route.contains("Трамвай")) {
                     var routesList = splitLongString(route);
                     for (String s : routesList)
                         result.append(s).append("; ");
