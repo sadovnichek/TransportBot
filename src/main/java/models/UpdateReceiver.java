@@ -25,13 +25,11 @@ public class UpdateReceiver {
      * Время последнего запуска на сервере
      */
     private final Date lastTimeUpdateOnServer;
-    private final BusStopsRepository busStops;
 
-    public UpdateReceiver(List<Handler> handlers, BusStopsRepository busStops) {
+    public UpdateReceiver(List<Handler> handlers) {
         this.handlers = handlers;
         this.chatIdToUser = new ConcurrentHashMap<>();
         this.lastTimeUpdateOnServer = new Date();
-        this.busStops = busStops;
     }
 
     /**

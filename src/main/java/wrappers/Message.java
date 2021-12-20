@@ -4,15 +4,15 @@ import models.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 /**
- * Класс-обёртка над сообщением
+ * Класс-обёртка над сообщением от пользователя
  */
 public class Message {
     private String chatId;
     private String messageData;
     private String command;
+    private Location location;
     private boolean hasCommand;
     private boolean hasCallbackQuery;
-    private Location location;
 
     public boolean hasCommand() {
         return hasCommand;

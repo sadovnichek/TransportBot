@@ -37,7 +37,7 @@ public class NextBusHandlerTests {
     public void nextBusHandler_ShouldSuggestDirections() throws IOException {
         File input = new File("src/test/resources/bazhova.html");
         Document doc = Jsoup.parse(input, "UTF-8");
-        var suggestions = busStops.getDirections("Музей Бажова", doc);
+        var suggestions = busStops.getDirections(doc);
         assertEquals(3, suggestions.size());
         Assert.assertTrue(suggestions.contains("Трамвайный парк (Чапаева)"));
         Assert.assertTrue(suggestions.contains("Аэроагентство"));

@@ -10,6 +10,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 public class SimpleMessageResponse implements MessageResponse {
     private final String chatId;
     private final String messageText;
+    /**
+     * Клавиатура, состоящая из кнопок
+     */
     private final ReplyKeyboardMarkup keyboardMarkup;
 
     public SimpleMessageResponse(String chatId, String message) {

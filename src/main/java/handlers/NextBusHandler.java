@@ -47,10 +47,13 @@ public class NextBusHandler implements Handler {
      * @return true - число, false - не число
      */
     private boolean isNumber(String str) {
-        if (str == null || str.isEmpty()) return false;
-        for (int i = 0; i < str.length(); i++) {
-            if(str.charAt(0) == '-') continue;
-            else if (!Character.isDigit(str.charAt(i))) return false;
+        if (str == null || str.isEmpty())
+            return false;
+        if (!Character.isDigit(str.charAt(0)) && str.charAt(0) != '-')
+            return false;
+        for (int i = 1; i < str.length(); i++) {
+            if (!Character.isDigit(str.charAt(i)))
+                return false;
         }
         return true;
     }
@@ -144,7 +147,7 @@ public class NextBusHandler implements Handler {
         try {
             Document doc = Jsoup.connect(busStops.getReferenceByName(name)).get();
             var reply = "*" + name + "\n\nУкажите направление из возможных:*";
-            var directions = busStops.getDirections(name, doc);
+            var directions = busStops.getDirections(doc);
             if (directions.size() == 0)
                 return new SimpleMessageResponse(user.getChatId(), "*Нет транспорта в ближайшее время*");
             return new ButtonsMessageResponse(user.getChatId(), reply, directions, name);

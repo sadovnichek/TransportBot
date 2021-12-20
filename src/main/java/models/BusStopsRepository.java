@@ -74,12 +74,10 @@ public class BusStopsRepository {
         return null;
     }
 
-    /**
-     * @param name имя остановки
-     * @param doc источник (страница bustime.ru), где есть расписание
+    /* @param doc источник (страница bustime.ru), где есть расписание
      * @return список направлений
      */
-    public List<String> getDirections(String name, Document doc) {
+    public List<String> getDirections(Document doc) {
         Set<String> result = new HashSet<>();
         Elements headLines = doc.getElementsByClass("ui header");
         for (Element headline : headLines) {
@@ -106,7 +104,6 @@ public class BusStopsRepository {
                 timetableText = transformText(timetableText, direction);
                 try {
                     Timetable timeTable = new Timetable(name, direction, timetableText, routes);
-                    System.out.println(timeTable.toString());
                     result.add(timeTable);
                 } catch (NullPointerException e) {
                     continue;
