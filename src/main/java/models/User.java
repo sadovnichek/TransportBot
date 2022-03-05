@@ -1,6 +1,6 @@
 package models;
 
-import wrappers.Message;
+import wrappers.MessageUpdate;
 
 import java.util.Date;
 
@@ -16,11 +16,11 @@ public class User {
      * Время последнего запроса данного пользователя
      */
     private long lastQueryTime;
-    private Message lastMessage;
+    private MessageUpdate lastMessageUpdate;
 
     public User(String chatId) {
         this.chatId = chatId;
-        this.lastMessage = null;
+        this.lastMessageUpdate = null;
     }
 
     public String getChatId() {
@@ -35,12 +35,12 @@ public class User {
         return this.lastQueryTime;
     }
 
-    public void setLastMessage(Message message) {this.lastMessage = message; }
+    public void setLastMessage(MessageUpdate messageUpdate) {this.lastMessageUpdate = messageUpdate; }
 
-    public boolean IsLastMessageSameTypeAsNew(Message message) {
-        if(lastMessage == null) return false;
-        return message.hasCallbackQuery() && lastMessage.hasCallbackQuery() ||
-                message.getLocation() != null && lastMessage.getLocation() != null
-                || message.getMessageData().equals(lastMessage.getMessageData());
+    public boolean IsLastMessageSameTypeAsNew(MessageUpdate messageUpdate) {
+        if(lastMessageUpdate == null) return false;
+        return messageUpdate.hasCallbackQuery() && lastMessageUpdate.hasCallbackQuery() ||
+                messageUpdate.getLocation() != null && lastMessageUpdate.getLocation() != null
+                || messageUpdate.getMessageData().equals(lastMessageUpdate.getMessageData());
     }
 }

@@ -6,7 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Before;
 import org.junit.Test;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,13 +18,13 @@ import static org.mockito.Mockito.when;
 public class NextBusHandlerTests {
     private User user;
     private NextBusHandler handler;
-    private Message message;
+    private MessageUpdate messageUpdate;
     private BusStopsRepository busStops;
 
     @Before
     public void setUp() {
         user = new User("123");
-        message = mock(Message.class);
+        messageUpdate = mock(MessageUpdate.class);
         busStops = new BusStopsRepository();
         handler = new NextBusHandler(busStops);
     }
@@ -62,8 +62,8 @@ public class NextBusHandlerTests {
      */
     @Test
     public void nextBusHandler_ShouldReplyIfBusStop_NotExist() {
-        when(message.getMessageData()).thenReturn("Морской путь");
-        var simpleMessageResponse = handler.handleMessage(user, message).get(0);
+        when(messageUpdate.getMessageData()).thenReturn("Морской путь");
+        var simpleMessageResponse = handler.handleMessage(user, messageUpdate).get(0);
         var reply = simpleMessageResponse.getMessageText();
         assertEquals(reply, "*Такой остановки нет*");
     }
@@ -76,8 +76,8 @@ public class NextBusHandlerTests {
     @Test
     public void nextBusHandler_ShouldChangeUserLastQueryTime() {
         long preQueryTime = user.getLastQueryTime();
-        when(message.getMessageData()).thenReturn("/nextbus a");
-        handler.handleMessage(user, message);
+        when(messageUpdate.getMessageData()).thenReturn("/nextbus a");
+        handler.handleMessage(user, messageUpdate);
         assertNotSame(preQueryTime, user.getLastQueryTime());
     }
 
@@ -87,8 +87,8 @@ public class NextBusHandlerTests {
      */
     @Test
     public void nextBusHandler_ShouldIgnoreInvalidSymbols() {
-        when(message.getMessageData()).thenReturn("/nextbus @#$%^&");
-        var simpleMessageResponse = handler.handleMessage(user, message).get(0);
+        when(messageUpdate.getMessageData()).thenReturn("/nextbus @#$%^&");
+        var simpleMessageResponse = handler.handleMessage(user, messageUpdate).get(0);
         var reply = simpleMessageResponse.getMessageText();
         assertEquals("*Такой остановки нет*", reply);
     }

@@ -4,7 +4,7 @@ import models.Handler;
 import models.User;
 import wrappers.MessageResponse;
 import wrappers.SimpleMessageResponse;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 
 import java.util.List;
 
@@ -22,10 +22,10 @@ public class StartHandler implements Handler {
     /**
      * Принимает сообщение от пользователя
      * @param user - сам пользователь
-     * @param message - сообщение от пользователя
+     * @param messageUpdate - сообщение от пользователя
      * @return сообщения, сгенерированные ботом
      */
-    public List<MessageResponse> handleMessage(User user, Message message) {
+    public List<MessageResponse> handleMessage(User user, MessageUpdate messageUpdate) {
         String startText = "*Привет! Я - Transport Bot\n" +
                 "Помощь тут - /help*";
         SimpleMessageResponse startMessage = new SimpleMessageResponse(user.getChatId(), startText);

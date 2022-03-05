@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 /**
  * Класс-обёртка над сообщением от пользователя
  */
-public class Message {
+public class MessageUpdate {
     private String chatId;
     private String messageData;
     private String command;
@@ -37,7 +37,7 @@ public class Message {
     /**
      * Сохраняет команду из сообщения, если она есть
      */
-    private void recognizeCommand(){
+    private void recognizeCommand() {
         if(messageData.charAt(0) == '/') {
             hasCommand = true;
             command = messageData.split("[\\s]")[0];
@@ -48,7 +48,7 @@ public class Message {
     /**
      * Сохраняет нужные данные из сообщения
      */
-    public Message(Update update) {
+    public MessageUpdate(Update update) {
         if (update.hasMessage()) {
             chatId = update.getMessage().getChatId().toString();
             if(update.getMessage().hasText()) {

@@ -4,7 +4,7 @@ import models.Handler;
 import models.User;
 import wrappers.MessageResponse;
 import wrappers.SimpleMessageResponse;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 
 import java.util.List;
 
@@ -24,11 +24,11 @@ public class HelpHandler implements Handler {
     /**
      * Принимает сообщение от пользователя
      * @param user - сам пользователь
-     * @param message - сообщение от пользователя
+     * @param messageUpdate - сообщение от пользователя
      * @return сообщение-помощь, сгенерированное ботом
      */
     @Override
-    public List<MessageResponse> handleMessage(User user, Message message) {
+    public List<MessageResponse> handleMessage(User user, MessageUpdate messageUpdate) {
         String startText = "*Я здесь, чтобы помочь тебе.*" +
                 "\n\n*Базовые команды*\n" +
                 "/start - начало работы\n" +

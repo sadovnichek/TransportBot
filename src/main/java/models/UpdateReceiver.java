@@ -1,7 +1,7 @@
 package models;
 
 import wrappers.MessageResponse;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 import wrappers.SimpleMessageResponse;
 
 import java.util.Date;
@@ -35,30 +35,33 @@ public class UpdateReceiver {
     /**
      * Добавляет пользователя в словарь.
      * Вызывает обработчик команды и обрабатывает её
-     * @param message принимаемое сообщение от пользователя
-     * @see Message
+     * @param messageUpdate принимаемое сообщение от пользователя
+     * @see MessageUpdate
      * @return список сообщений, сгенерированных ботом
      * */
-    public List<MessageResponse> handle(Message message) {
-        String chatId = message.getChatId();
+    public List<MessageResponse> handle(MessageUpdate messageUpdate) {
+        String chatId = messageUpdate.getChatId();
         if (!chatIdToUser.containsKey(chatId))
             chatIdToUser.put(chatId, new User(chatId));
         User user = chatIdToUser.get(chatId);
-        if(message.getLocation() != null)
-            return getHandlerByCommand("/nextbus").handleMessage(user, message);
-        if(Objects.equals(message.getCommand(), "/users"))
+        if(messageUpdate.getLocation() != null) // has location?
+            return getHandlerByCommand("/nextbus").handleMessage(user, messageUpdate);
+        if(Objects.equals(messageUpdate.getCommand(), "/users"))
             return List.of(new SimpleMessageResponse(chatId, chatIdToUser.size() + "\nLast start: " +
                     lastTimeUpdateOnServer));
-        if (message.hasCommand()) {
+        if (messageUpdate.hasCommand()) {
             try {
-                return getHandlerByCommand(message.getCommand()).handleMessage(user, message);
+                return getHandlerByCommand(messageUpdate.getCommand()).handleMessage(user, messageUpdate);
             }
             catch (Exception e) {
                 e.printStackTrace();
-                getHandlerByCommand("/help").handleMessage(user, message);
+                getHandlerByCommand("/help").handleMessage(user, messageUpdate);
             }
         }
-        return getHandlerByCommand("/help").handleMessage(user, message);
+        else {
+            return getHandlerByCommand("/nextbus").handleMessage(user, messageUpdate);
+        }
+        return getHandlerByCommand("/help").handleMessage(user, messageUpdate);
     }
 
     /**

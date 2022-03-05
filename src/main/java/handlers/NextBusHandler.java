@@ -6,7 +6,7 @@ import org.jsoup.nodes.Document;
 import wrappers.ButtonsMessageResponse;
 import wrappers.MessageResponse;
 import wrappers.SimpleMessageResponse;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,21 +61,21 @@ public class NextBusHandler implements Handler {
     /**
      * Обрабатывает входящее от пользователя сообщение с командой /nextbus
      * @param user - пользователь
-     * @param message - сообщение от пользователя
+     * @param messageUpdate - сообщение от пользователя
      * @return список сообщений в ответ пользователю
      */
     @Override
-    public List<MessageResponse> handleMessage(User user, Message message) {
+    public List<MessageResponse> handleMessage(User user, MessageUpdate messageUpdate) {
         long currentTime = new Date().getTime();
-        if (currentTime - user.getLastQueryTime() <= 10 * 1000 && user.IsLastMessageSameTypeAsNew(message))
+        if (currentTime - user.getLastQueryTime() <= 5 * 1000 && user.IsLastMessageSameTypeAsNew(messageUpdate))
             return List.of(new SimpleMessageResponse(user.getChatId(),
-                    "*Пожалуйста, соблюдайте интервал в 10 секунд между сообщениями. " +
+                    "*Пожалуйста, соблюдайте интервал в 5 секунд между сообщениями. " +
                             "Это поможет снизить нагрузку на сервер*"));
-        String userMessage = message.getMessageData();
+        String userMessage = messageUpdate.getMessageData();
         user.setLastQueryTime();
-        user.setLastMessage(message);
-        if(message.getLocation() != null)
-            return processLocation(user, message);
+        user.setLastMessage(messageUpdate);
+        if(messageUpdate.getLocation() != null)
+            return processLocation(user, messageUpdate);
         String[] tokens = userMessage.trim().split("[:]+");
         if(tokens.length == 0)
             throw new IllegalArgumentException("command args cannot be empty");
@@ -160,11 +160,11 @@ public class NextBusHandler implements Handler {
     /**
      * Обрабатывает локацию в сообщении
      * @param user пользователь, отправивший команду
-     * @param message сообщение от пользователя
+     * @param messageUpdate сообщение от пользователя
      * @return список сообщений - ответов от бота
      */
-    private List<MessageResponse> processLocation(User user, Message message) {
-        List<BusStop> candidates = busStops.getNearestBusStop(message.getLocation());
+    private List<MessageResponse> processLocation(User user, MessageUpdate messageUpdate) {
+        List<BusStop> candidates = busStops.getNearestBusStop(messageUpdate.getLocation());
         if(candidates.size() == 0)
             return List.of(new SimpleMessageResponse(user.getChatId(), "*Вы не находитесь на остановке*"));
         BusStop mostPossible = candidates.get(0);

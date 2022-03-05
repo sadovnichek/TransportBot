@@ -3,7 +3,7 @@ import handlers.StartHandler;
 import models.User;
 import org.junit.Before;
 import org.junit.Test;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 
 import static junit.framework.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -12,14 +12,14 @@ public class SupportHandlersTest {
     private User user;
     private StartHandler startHandler;
     private HelpHandler helpHandler;
-    private Message update;
+    private MessageUpdate update;
 
     @Before
     public void setUp() {
         user = new User("123");
         startHandler = new StartHandler();
         helpHandler = new HelpHandler();
-        update = mock(Message.class);
+        update = mock(MessageUpdate.class);
     }
 
     /**

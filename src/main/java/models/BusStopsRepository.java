@@ -123,7 +123,7 @@ public class BusStopsRepository {
         for(BusStop busStop : busStops) {
             Location busStopLocation = busStop.getLocation();
             double distance = userLocation.distanceTo(busStopLocation);
-            if (distance <= 70)
+            if (distance <= 80)
                 nearestStops.put(distance, busStop);
         }
         return nearestStops.values().stream().limit(3).collect(Collectors.toList());
