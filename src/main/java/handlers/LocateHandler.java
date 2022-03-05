@@ -5,7 +5,7 @@ import models.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 import wrappers.MessageResponse;
 import wrappers.SimpleMessageResponse;
 
@@ -27,11 +27,11 @@ public class LocateHandler implements Handler {
     /**
      * Создаёт клавиатуру с кнопкой и прикрепляет её к сообщению
      * @param user - пользователь
-     * @param message - сообщение от пользователя
+     * @param messageUpdate - сообщение от пользователя
      * @return сообщение
      */
     @Override
-    public List<MessageResponse> handleMessage(User user, Message message) {
+    public List<MessageResponse> handleMessage(User user, MessageUpdate messageUpdate) {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         var button = new KeyboardButton("Определить по GPS \uD83D\uDCCC");
         button.setRequestLocation(true);

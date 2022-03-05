@@ -7,7 +7,7 @@ import models.Handler;
 import models.UpdateReceiver;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import wrappers.MessageResponse;
-import wrappers.Message;
+import wrappers.MessageUpdate;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -18,14 +18,14 @@ import java.util.List;
 /**
  * Класс бота
  */
-public class Bot extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramLongPollingBot {
     private final String token;
     private final UpdateReceiver updateReceiver;
 
     /**
      * В конструкторе регистрируются обработчики команд
      */
-    public Bot(String token) {
+    public TelegramBot(String token) {
         this.token = token;
         BusStopsRepository busStops = new BusStopsRepository();
         List<Handler> handlers = List.of(
@@ -57,7 +57,7 @@ public class Bot extends TelegramLongPollingBot {
      */
     @Override
     public void onUpdateReceived(Update update) {
-        Message message = new Message(update);
+        MessageUpdate messageUpdate = new MessageUpdate(update);
 
         if(update.hasCallbackQuery()){
             AnswerCallbackQuery answer = new AnswerCallbackQuery();
@@ -68,7 +68,7 @@ public class Bot extends TelegramLongPollingBot {
                 e.printStackTrace();
             }
         }
-        List<MessageResponse> responseMessages = updateReceiver.handle(message);
+        List<MessageResponse> responseMessages = updateReceiver.handle(messageUpdate);
         sendMessages(responseMessages);
     }
 
