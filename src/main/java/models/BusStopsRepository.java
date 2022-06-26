@@ -99,8 +99,7 @@ public class BusStopsRepository {
         List<Timetable> result = new ArrayList<>();
         Elements headLines = doc.getElementsByClass("eight wide column").select("div");
         for (Element headline : headLines) {
-            String timetableText = headline.text();
-            if(timetableText.startsWith("табло " + direction) && timetableText.contains("время")) {
+            String timetableText = headline.text();if(timetableText.startsWith("board " + direction) && timetableText.contains("time ")) {
                 timetableText = transformText(timetableText, direction);
                 try {
                     Timetable timeTable = new Timetable(name, direction, timetableText, routes);
@@ -134,8 +133,8 @@ public class BusStopsRepository {
      */
     private String transformText(String originalText, String direction) {
         String text = originalText;
-        text = text.replace("табло", "").replace("время", "")
-                .replace("+", "").replace("маршруты", "")
+        text = text.replace("board", "").replace("time", "")
+                .replace("+", "").replace("routes", "")
                 .replace(direction, "").trim();
         if (text.contains("ТВ"))
             text = text.replace("ТВ", " Трамвай-");

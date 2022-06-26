@@ -12,21 +12,24 @@ import wrappers.MessageUpdate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import wrappers.SimpleMessageResponse;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Класс бота
  */
 public class TelegramBot extends TelegramLongPollingBot {
-    private final String token;
+    private final String _token;
     private final UpdateReceiver updateReceiver;
 
     /**
      * В конструкторе регистрируются обработчики команд
      */
     public TelegramBot(String token) {
-        this.token = token;
+        _token = token;
         BusStopsRepository busStops = new BusStopsRepository();
         List<Handler> handlers = List.of(
                 new StartHandler(),
@@ -42,7 +45,7 @@ public class TelegramBot extends TelegramLongPollingBot {
      * @param messages - список сообщений, сгенерированных ботом
      */
     private synchronized void sendMessages(List<MessageResponse> messages) {
-        for (MessageResponse message : messages) {
+        for (var message : messages) {
             try {
                 execute(message.createMessage());
             } catch (TelegramApiException e) {
@@ -79,6 +82,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return token;
+        return _token;
     }
 }
