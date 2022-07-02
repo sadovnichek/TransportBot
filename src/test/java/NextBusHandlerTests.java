@@ -45,19 +45,6 @@ public class NextBusHandlerTests {
     }
 
     /**
-     * Проверяет, что бот вернёт расписание, если всё правильно
-     */
-    @Test
-    public void nextBusHandler_ShouldGetTimetable() throws IOException {
-        File input = new File("src/test/resources/bazhova.html");
-        Document doc = Jsoup.parse(input, "UTF-8");
-        var suggestions = busStops.getTimetable("Музей Бажова", "Трамвайный парк (Чапаева)", doc);
-        assertEquals(1, suggestions.size());
-        var timetable = suggestions.get(0).toString();
-        Assert.assertTrue(timetable.contains("*Музей Бажова-->Трамвайный парк (Чапаева)*\n"));
-    }
-
-    /**
      * Если указанной остановки нет, бот сообщит об этом
      */
     @Test
