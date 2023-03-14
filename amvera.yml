@@ -1,0 +1,8 @@
+meta:
+  environment: jvm
+  toolchain:
+    name: maven
+    version: 3.8.3
+
+run:
+  jarName: target/TransportBot-1.0-SNAPSHOT-jar-with-dependencies.jar
